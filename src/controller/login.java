@@ -39,5 +39,6 @@ public class login implements Initializable {
     }
 
     public void LoginSubmitButtonAction(ActionEvent actionEvent) {
+        System.out.println("Submit button clicked!");
     }
 }
