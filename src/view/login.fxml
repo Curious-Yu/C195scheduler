@@ -9,32 +9,24 @@
 
 <AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: darkseagreen;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.login">
    <children>
-      <TextField fx:id="UserNameBox" layoutX="292.0" layoutY="185.0" prefHeight="25.0" prefWidth="210.0" promptText="Enter User Name">
+      <TextField fx:id="UserNameBox" layoutX="213.0" layoutY="163.0" prefHeight="25.0" prefWidth="289.0" promptText="Enter User Name" />
+      <PasswordField fx:id="PasswordBox" layoutX="213.0" layoutY="203.0" prefHeight="25.0" prefWidth="289.0" promptText="Enter Password" />
+      <Label fx:id="UserNameLabel" layoutX="83.0" layoutY="165.0" text="User Name :" textAlignment="RIGHT">
          <font>
             <Font size="14.0" />
          </font>
-      </TextField>
-      <PasswordField fx:id="PasswordBox" layoutX="292.0" layoutY="222.0" prefHeight="25.0" prefWidth="210.0" promptText="Enter Password">
+      </Label>
+      <Label fx:id="PasswordLabel" layoutX="93.0" layoutY="205.0" text="Password :" textAlignment="RIGHT">
          <font>
             <Font size="14.0" />
          </font>
-      </PasswordField>
-      <Label fx:id="UserNameLabel" layoutX="106.0" layoutY="187.0" text="User Name :" textAlignment="RIGHT">
+      </Label>
+      <Label fx:id="LoginMessageLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="139.0" layoutY="95.0" prefHeight="27.0" prefWidth="307.0" text="Please Login" textAlignment="CENTER">
          <font>
             <Font size="18.0" />
          </font>
       </Label>
-      <Label fx:id="PasswordLabel" layoutX="113.0" layoutY="224.0" text="Password :" textAlignment="RIGHT">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-      <Label fx:id="LoginMessageLabel" alignment="CENTER" contentDisplay="CENTER" layoutX="250.0" layoutY="99.0" text="Please Login" textAlignment="CENTER">
-         <font>
-            <Font size="18.0" />
-         </font>
-      </Label>
-      <Label fx:id="LoginLabel" alignment="CENTER" layoutX="105.0" layoutY="30.0" prefHeight="53.0" prefWidth="390.0" text="Scheduler Login" textAlignment="RIGHT">
+      <Label fx:id="LoginLabel" alignment="CENTER" layoutX="22.0" layoutY="27.0" prefHeight="53.0" prefWidth="541.0" text="Scheduler Login" textAlignment="RIGHT">
          <font>
             <Font size="36.0" />
          </font>
@@ -49,13 +41,10 @@
             <Font size="18.0" />
          </font>
       </Button>
-      <Label fx:id="LocationLabel" layoutX="107.0" layoutY="279.0" text="Location">
-         <font>
-            <Font size="18.0" />
-         </font></Label>
-      <TextField fx:id="LocationBox" disable="true" layoutX="188.0" layoutY="278.0" prefHeight="30.0" prefWidth="314.0" promptText="User Location">
+      <Label fx:id="LocationLabel" layoutX="100.0" layoutY="264.0" text="Location">
          <font>
             <Font size="14.0" />
-         </font></TextField>
+         </font></Label>
+      <TextField fx:id="LocationBox" disable="true" layoutX="213.0" layoutY="259.0" prefHeight="30.0" prefWidth="289.0" promptText="User Location" />
    </children>
 </AnchorPane>
