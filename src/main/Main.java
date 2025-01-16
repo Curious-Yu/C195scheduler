@@ -17,12 +17,11 @@ public class Main extends Application {
     }
 
     public static void main(String[] args) {
-
+        JDBC.openConnection();
         launch(args);
 
         System.out.println("Hello project!");
 
-        JDBC.openConnection();
         JDBC.closeConnection();
 
     }

@@ -7,7 +7,7 @@
 <?import javafx.scene.layout.AnchorPane?>
 <?import javafx.scene.text.Font?>
 
-<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: darkseagreen;" xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml" fx:controller="controller.login">
+<AnchorPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" style="-fx-background-color: darkseagreen;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.login">
    <children>
       <TextField fx:id="UserNameBox" layoutX="292.0" layoutY="185.0" prefHeight="25.0" prefWidth="210.0" promptText="Enter User Name">
          <font>
@@ -49,11 +49,11 @@
             <Font size="18.0" />
          </font>
       </Button>
-      <Label fx:id="LocationLabel" layoutX="169.0" layoutY="278.0" text="Location">
+      <Label fx:id="LocationLabel" layoutX="107.0" layoutY="279.0" text="Location">
          <font>
             <Font size="18.0" />
          </font></Label>
-      <TextField fx:id="LocationBox" disable="true" layoutX="270.0" layoutY="277.0" promptText="User Location">
+      <TextField fx:id="LocationBox" disable="true" layoutX="188.0" layoutY="278.0" prefHeight="30.0" prefWidth="314.0" promptText="User Location">
          <font>
             <Font size="14.0" />
          </font></TextField>
