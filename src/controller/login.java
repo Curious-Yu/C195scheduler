@@ -4,6 +4,8 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -11,12 +13,12 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 
 import java.net.URL;
-import java.time.ZoneId;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class login implements Initializable {
     @FXML public TextField UserNameBox;
@@ -35,7 +37,7 @@ public class login implements Initializable {
         // Get the user's default locale
         Locale locale = Locale.getDefault();
 
-        // Load the appropriate ResourceBundle based on the locale
+        // Load the appropriate ResourceBundle based on the locale (english or french)
         ResourceBundle bundle = ResourceBundle.getBundle("login", locale);
 
         // Set text for labels and buttons from the resource bundle
@@ -62,22 +64,6 @@ public class login implements Initializable {
         // Set button texts
         LoginSubmitButton.setText(bundle.getString("LoginSubmitButton.text"));
         LoginCancelButton.setText(bundle.getString("LoginCancelButton.text"));
-
-        System.out.println("Initialized with locale: " + locale);
-        System.out.println("Location: " + location);
-    }
-
-    @FXML
-    public void LoginCancelButtonAction(ActionEvent actionEvent) {
-        System.out.println("Cancel button clicked!");
-        Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-        stage.close();
-    }
-
-    @FXML
-    public void LoginSubmitButtonAction(ActionEvent actionEvent) {
-        System.out.println("Submit button clicked!");
-        // Add your login logic here
     }
 
     private String getCityFromTimeZone() {
@@ -109,5 +95,47 @@ public class login implements Initializable {
 
         // Format as "UTC+X" or "UTC-X" (simplified to hour offset)
         return String.format("UTC%+d", offsetHours);
+    }
+
+    @FXML
+    public void LoginCancelButtonAction(ActionEvent actionEvent) {
+        System.out.println("Cancel button clicked!");
+        Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+        stage.close();
+    }
+
+    @FXML
+    public void LoginSubmitButtonAction(ActionEvent actionEvent) {
+        // Check if username or password is empty
+        String userName = UserNameBox.getText();
+        String password = PasswordBox.getText();
+
+        // If either the username or password is empty, show an alert
+        if (userName.isEmpty() || password.isEmpty()) {
+            showAlert();
+        } else {
+            // Proceed with login logic
+            System.out.println("Submit button clicked!");
+            // Add your login logic here
+        }
+    }
+
+    private void showAlert() {
+        // Get the user's default locale
+        Locale locale = Locale.getDefault();
+
+        // Load the appropriate ResourceBundle based on the locale (english or french)
+        ResourceBundle bundle = ResourceBundle.getBundle("login", locale);
+
+        // Get alert message from properties
+        String alertTitle = bundle.getString("Alert");
+        String alertMessage = bundle.getString("AlertMessage");
+
+        // Create an alert with the message from the properties file
+        Alert alert = new Alert(AlertType.WARNING);
+        alert.setTitle(alertTitle);  // Title from properties
+        alert.setHeaderText(null);
+        alert.setContentText(alertMessage);  // Message from properties
+        alert.showAndWait();
     }
 }
