@@ -3,8 +3,11 @@ package controller;
 import helper.UsersData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
@@ -14,6 +17,7 @@ import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import model.Users;
 
+import java.io.IOException;
 import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -132,7 +136,28 @@ public class login implements Initializable {
             String successTitle = bundle.getString("SuccessAlert"); // New property for success
             String successMessage = String.format(bundle.getString("SuccessMessage"), authenticatedUser.getUserName());
             showAlert(successTitle, successMessage); // Correct usage
-            System.out.println("User ID: " + authenticatedUser.getUserId());
+            // Proceed to open the appointment screen
+            try {
+                // Load the appointment.fxml scene
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/appointment.fxml"));
+                Parent appointmentRoot = loader.load();
+
+                // Get the current stage (window)
+                Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+                // Set the new scene for the stage
+                Scene appointmentScene = new Scene(appointmentRoot);
+                stage.setScene(appointmentScene);
+                stage.show();
+
+            } catch (IOException e) {
+                e.printStackTrace();
+                // Get the error alert title and message from the resource bundle
+                String errorAlertTitle = bundle.getString("ErrorAlertTitle");
+                String errorAlertMessage = bundle.getString("ErrorAlertMessage");
+            }
+
+            // Print user ID for debug purposes
         } else {
             // Failed login
             String alertTitle = bundle.getString("Alert");
