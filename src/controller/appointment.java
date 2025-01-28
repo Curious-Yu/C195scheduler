@@ -8,7 +8,7 @@ public class appointment {
     public Button modifyAppointmentButton;
     public Button deleteAppointmentButton;
     public RadioButton allTimeRadio;
-    public ToggleGroup apptTimeToggle;
+    public ToggleGroup appointmentToggle;
     public RadioButton currentMonthRadio;
     public RadioButton currentWeekRadio;
     public TableView appointmentTable;
@@ -19,7 +19,7 @@ public class appointment {
     public TableColumn typeColumn;
     public TableColumn startsAtColumn;
     public TableColumn endsAtColumn;
-    public TableColumn custIdColumn;
+    public TableColumn customerIdColumn;
     public TableColumn userIdColumn;
     public TableColumn contactIdColumn;
     public Button customersButton;
