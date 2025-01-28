@@ -139,6 +139,8 @@ public class login implements Initializable {
             String alertMessage = bundle.getString("AlertMessage"); // Invalid username/password
             showAlert(alertTitle, alertMessage); // Correct usage
         }
+
+        // will need to open the appointment landing page here
     }
 
     private void showAlert(String title, String message) {
