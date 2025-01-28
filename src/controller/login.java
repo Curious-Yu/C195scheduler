@@ -1,5 +1,6 @@
 package controller;
 
+import helper.UsersData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
@@ -11,6 +12,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
+import model.Users;
 
 import java.net.URL;
 import java.util.Locale;
@@ -106,36 +108,44 @@ public class login implements Initializable {
 
     @FXML
     public void LoginSubmitButtonAction(ActionEvent actionEvent) {
-        // Check if username or password is empty
+        // Get username and password from text fields
         String userName = UserNameBox.getText();
         String password = PasswordBox.getText();
 
-        // If either the username or password is empty, show an alert
+        // Load the ResourceBundle for the current locale
+        Locale locale = Locale.getDefault();
+        ResourceBundle bundle = ResourceBundle.getBundle("login", locale);
+
+        // Check if username or password is empty
         if (userName.isEmpty() || password.isEmpty()) {
-            showAlert();
+            // Show an alert with the appropriate message
+            String alertTitle = bundle.getString("Alert");
+            String alertMessage = bundle.getString("EmptyFieldsMessage"); // New property for empty fields
+            showAlert(alertTitle, alertMessage); // Correct usage
+            return;
+        }
+
+        // Validate user credentials using UsersData
+        Users authenticatedUser = UsersData.validateUser(userName, password);
+        if (authenticatedUser != null) {
+            // Successful login
+            String successTitle = bundle.getString("SuccessAlert"); // New property for success
+            String successMessage = String.format(bundle.getString("SuccessMessage"), authenticatedUser.getUserName());
+            showAlert(successTitle, successMessage); // Correct usage
+            System.out.println("User ID: " + authenticatedUser.getUserId());
         } else {
-            // Proceed with login logic
-            System.out.println("Submit button clicked!");
-            // Add your login logic here
+            // Failed login
+            String alertTitle = bundle.getString("Alert");
+            String alertMessage = bundle.getString("AlertMessage"); // Invalid username/password
+            showAlert(alertTitle, alertMessage); // Correct usage
         }
     }
 
-    private void showAlert() {
-        // Get the user's default locale
-        Locale locale = Locale.getDefault();
-
-        // Load the appropriate ResourceBundle based on the locale (english or french)
-        ResourceBundle bundle = ResourceBundle.getBundle("login", locale);
-
-        // Get alert message from properties
-        String alertTitle = bundle.getString("Alert");
-        String alertMessage = bundle.getString("AlertMessage");
-
-        // Create an alert with the message from the properties file
-        Alert alert = new Alert(AlertType.WARNING);
-        alert.setTitle(alertTitle);  // Title from properties
+    private void showAlert(String title, String message) {
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle(title);
         alert.setHeaderText(null);
-        alert.setContentText(alertMessage);  // Message from properties
+        alert.setContentText(message);
         alert.showAndWait();
     }
 }
