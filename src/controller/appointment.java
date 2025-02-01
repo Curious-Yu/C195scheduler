@@ -1,7 +1,11 @@
 package controller;
 
 import javafx.event.ActionEvent;
+import javafx.scene.Node;
 import javafx.scene.control.*;
+import javafx.stage.Stage;
+
+import java.util.Optional;
 
 public class appointment {
     public Button addAppointmentButton;
@@ -51,5 +55,18 @@ public class appointment {
     }
 
     public void exitActionButton(ActionEvent actionEvent) {
+        // Show confirmation dialog before exiting
+        Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmDialog.setTitle("Exit Confirmation");
+        confirmDialog.setHeaderText(null);
+        confirmDialog.setContentText("Are you sure you want to exit?");
+
+        Optional<ButtonType> result = confirmDialog.showAndWait();
+
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // Get the current stage and close it
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            stage.close();
+        }
     }
 }
