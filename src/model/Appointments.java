@@ -1,114 +1,153 @@
 package model;
 
+import javafx.beans.property.*;
 import java.time.LocalDateTime;
 
 public class Appointments {
-
-    private int appointmentId;
-    private String title;
-    private String description;
-    private String location;
-    private String type;
-    private LocalDateTime localStart;
-    private LocalDateTime localEnd;
-    private int customerId;
-    private int userId;
-    private int contactId;
+    private IntegerProperty appointmentId;
+    private StringProperty title;
+    private StringProperty description;
+    private StringProperty location;
+    private StringProperty type;
+    private ObjectProperty<LocalDateTime> localStart;
+    private ObjectProperty<LocalDateTime> localEnd;
+    private IntegerProperty customerId;
+    private IntegerProperty userId;
+    private IntegerProperty contactId;
 
     // Constructor
     public Appointments(int appointmentId, String title, String description, String location, String type,
-                       LocalDateTime localStart, LocalDateTime localEnd, int customerId, int userId, int contactId) {
-        this.appointmentId = appointmentId;
-        this.title = title;
-        this.description = description;
-        this.location = location;
-        this.type = type;
-        this.localStart = localStart;
-        this.localEnd = localEnd;
-        this.customerId = customerId;
-        this.userId = userId;
-        this.contactId = contactId;
+                        LocalDateTime localStart, LocalDateTime localEnd, int customerId, int userId, int contactId) {
+        this.appointmentId = new SimpleIntegerProperty(appointmentId);
+        this.title = new SimpleStringProperty(title);
+        this.description = new SimpleStringProperty(description);
+        this.location = new SimpleStringProperty(location);
+        this.type = new SimpleStringProperty(type);
+        this.localStart = new SimpleObjectProperty<>(localStart);
+        this.localEnd = new SimpleObjectProperty<>(localEnd);
+        this.customerId = new SimpleIntegerProperty(customerId);
+        this.userId = new SimpleIntegerProperty(userId);
+        this.contactId = new SimpleIntegerProperty(contactId);
     }
 
-    // Getters and Setters
-    public int getAppointmentId() {
+    // Getters and Setters using JavaFX properties
+    public IntegerProperty appointmentIdProperty() {
         return appointmentId;
     }
 
-    public void setAppointmentId(int appointmentId) {
-        this.appointmentId = appointmentId;
+    public int getAppointmentId() {
+        return appointmentId.get();
     }
 
-    public String getTitle() {
+    public void setAppointmentId(int appointmentId) {
+        this.appointmentId.set(appointmentId);
+    }
+
+    public StringProperty titleProperty() {
         return title;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public String getTitle() {
+        return title.get();
     }
 
-    public String getDescription() {
+    public void setTitle(String title) {
+        this.title.set(title);
+    }
+
+    public StringProperty descriptionProperty() {
         return description;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public String getDescription() {
+        return description.get();
     }
 
-    public String getLocation() {
+    public void setDescription(String description) {
+        this.description.set(description);
+    }
+
+    public StringProperty locationProperty() {
         return location;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    public String getLocation() {
+        return location.get();
     }
 
-    public String getType() {
+    public void setLocation(String location) {
+        this.location.set(location);
+    }
+
+    public StringProperty typeProperty() {
         return type;
     }
 
-    public void setType(String type) {
-        this.type = type;
+    public String getType() {
+        return type.get();
     }
 
-    public LocalDateTime getLocalStart() {
+    public void setType(String type) {
+        this.type.set(type);
+    }
+
+    public ObjectProperty<LocalDateTime> localStartProperty() {
         return localStart;
     }
 
-    public void setLocalStart(LocalDateTime localStart) {
-        this.localStart = localStart;
+    public LocalDateTime getLocalStart() {
+        return localStart.get();
     }
 
-    public LocalDateTime getLocalEnd() {
+    public void setLocalStart(LocalDateTime localStart) {
+        this.localStart.set(localStart);
+    }
+
+    public ObjectProperty<LocalDateTime> localEndProperty() {
         return localEnd;
     }
 
-    public void setLocalEnd(LocalDateTime localEnd) {
-        this.localEnd = localEnd;
+    public LocalDateTime getLocalEnd() {
+        return localEnd.get();
     }
 
-    public int getCustomerId() {
+    public void setLocalEnd(LocalDateTime localEnd) {
+        this.localEnd.set(localEnd);
+    }
+
+    public IntegerProperty customerIdProperty() {
         return customerId;
     }
 
-    public void setCustomerId(int customerId) {
-        this.customerId = customerId;
+    public int getCustomerId() {
+        return customerId.get();
     }
 
-    public int getUserId() {
+    public void setCustomerId(int customerId) {
+        this.customerId.set(customerId);
+    }
+
+    public IntegerProperty userIdProperty() {
         return userId;
     }
 
-    public void setUserId(int userId) {
-        this.userId = userId;
+    public int getUserId() {
+        return userId.get();
     }
 
-    public int getContactId() {
+    public void setUserId(int userId) {
+        this.userId.set(userId);
+    }
+
+    public IntegerProperty contactIdProperty() {
         return contactId;
     }
 
-    public void setContactId(int contactId) {
-        this.contactId = contactId;
+    public int getContactId() {
+        return contactId.get();
     }
 
+    public void setContactId(int contactId) {
+        this.contactId.set(contactId);
+    }
 }
