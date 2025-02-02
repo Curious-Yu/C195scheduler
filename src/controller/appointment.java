@@ -91,7 +91,57 @@ public class appointment {
     }
 
     public void deleteAppointmentActionButton(ActionEvent actionEvent) {
-        // Code for deleting an appointment
+        try {
+            // Get the selected appointment
+            Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
+
+            // Check if an appointment is selected
+            if (selectedAppointment == null) {
+                showAlert("No Selection", "Please select an appointment to delete.");
+                return;
+            }
+
+            int appointmentId = selectedAppointment.getAppointmentId();
+            String appointmentType = selectedAppointment.getType();
+            String appointmentDate = selectedAppointment.getLocalStart().toLocalDate().toString();
+            String appointmentTime = selectedAppointment.getLocalStart().toLocalTime().toString();
+
+            // Confirmation message with detailed appointment info
+            String confirmationMessage = String.format(
+                    "Are you sure you want to delete Appointment ID: %d?\nDate: %s\nTime: %s\nType: %s",
+                    appointmentId, appointmentDate, appointmentTime, appointmentType
+            );
+
+            // Show confirmation dialog
+            Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
+            confirmDialog.setTitle("Confirm Deletion");
+            confirmDialog.setHeaderText(null);
+            confirmDialog.setContentText(confirmationMessage);
+
+            Optional<ButtonType> result = confirmDialog.showAndWait();
+
+            if (result.isPresent() && result.get() == ButtonType.OK) {
+                // Perform the deletion
+                AppointmentData.deleteAppointment(appointmentId);
+
+                // Refresh the TableView with updated data
+                appointmentTable.setItems(AppointmentData.selectAllAppointments());
+
+                // Show confirmation message
+                Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
+                infoAlert.setTitle("Deletion Successful");
+                infoAlert.setHeaderText(null);
+                infoAlert.setContentText(
+                        String.format("Appointment ID: %d on %s at %s (Type: %s) has been deleted.",
+                                appointmentId, appointmentDate, appointmentTime, appointmentType)
+                );
+                infoAlert.showAndWait();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error", "An error occurred while deleting the appointment.");
+        }
     }
 
     public void OnAllTimeRadio(ActionEvent actionEvent) {

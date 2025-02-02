@@ -114,4 +114,13 @@ public abstract class AppointmentData {
 
         return appointmentObservableList;
     }
+
+    // Method to delete an appointment by Appointment_ID
+    public static void deleteAppointment(int appointmentId) throws SQLException {
+        String sql = "DELETE FROM client_schedule.appointments WHERE Appointment_ID = ?";
+
+        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
+        statement.setInt(1, appointmentId);
+        statement.executeUpdate();
+    }
 }
