@@ -4,12 +4,16 @@ import helper.AppointmentData;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
+import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
+import javafx.scene.Parent;
+import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.Appointments;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.Optional;
@@ -84,10 +88,62 @@ public class appointment {
 
     public void addAppointmentActionButton(ActionEvent actionEvent) {
         // Code for adding a new appointment
+        try {
+
+            // Load the addAppointment.fxml file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/addAppointment.fxml"));
+
+            if (loader.getLocation() == null) {
+                showAlert("Error", "addAppointment.fxml not found. Please check the file path.");
+                return;
+            }
+
+            Parent root = loader.load();
+
+            // Get the current stage
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+            // Create a new scene and set it
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+            System.out.println("Successfully opened addAppointment.fxml");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Unable to open the Add Appointment window.");
+        }
     }
 
     public void modifyAppointmentActionButton(ActionEvent actionEvent) {
         // Code for modifying an existing appointment
+        try {
+
+            // Load the addAppointment.fxml file
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyAppointment.fxml"));
+
+            if (loader.getLocation() == null) {
+                showAlert("Error", "modifyAppointment.fxml not found. Please check the file path.");
+                return;
+            }
+
+            Parent root = loader.load();
+
+            // Get the current stage
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
+            // Create a new scene and set it
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+            System.out.println("Successfully opened modifyAppointment.fxml");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Unable to open the Modify Appointment window.");
+        }
     }
 
     public void deleteAppointmentActionButton(ActionEvent actionEvent) {
@@ -218,4 +274,5 @@ public class appointment {
         alert.setContentText(message);
         alert.showAndWait();
     }
+
 }

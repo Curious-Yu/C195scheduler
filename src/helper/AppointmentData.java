@@ -123,4 +123,68 @@ public abstract class AppointmentData {
         statement.setInt(1, appointmentId);
         statement.executeUpdate();
     }
+
+    // Method to insert a new appointment into the database
+    public static void insertAppointment(String title, String description, String location, String type,
+                                         LocalDateTime startDateTime, LocalDateTime endDateTime,
+                                         Integer customerId, Integer userId, Integer contactId) throws SQLException {
+        if (JDBC.connection == null) {
+            JDBC.openConnection();
+        }
+
+        String sql = "INSERT INTO client_schedule.appointments (Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
+            statement.setString(1, title);
+            statement.setString(2, description);
+            statement.setString(3, location);
+            statement.setString(4, type);
+            statement.setTimestamp(5, java.sql.Timestamp.valueOf(startDateTime));
+            statement.setTimestamp(6, java.sql.Timestamp.valueOf(endDateTime));
+            statement.setInt(7, customerId);
+            statement.setInt(8, userId);
+            statement.setInt(9, contactId);
+
+            int rowsInserted = statement.executeUpdate();
+            if (rowsInserted > 0) {
+                System.out.println("Successfully added appointment.");
+            } else {
+                System.out.println("Failed to add appointment.");
+            }
+        }
+    }
+
+    // Method to update an existing appointment
+    public static void updateAppointment(int appointmentId, String title, String description, String location, String type,
+                                         LocalDateTime startDateTime, LocalDateTime endDateTime,
+                                         Integer customerId, Integer userId, Integer contactId) throws SQLException {
+        if (JDBC.connection == null) {
+            JDBC.openConnection();
+        }
+
+        String sql = "UPDATE client_schedule.appointments " +
+                "SET Title = ?, Description = ?, Location = ?, Type = ?, Start = ?, End = ?, " +
+                "Customer_ID = ?, User_ID = ?, Contact_ID = ? WHERE Appointment_ID = ?";
+
+        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
+            statement.setString(1, title);
+            statement.setString(2, description);
+            statement.setString(3, location);
+            statement.setString(4, type);
+            statement.setTimestamp(5, java.sql.Timestamp.valueOf(startDateTime));
+            statement.setTimestamp(6, java.sql.Timestamp.valueOf(endDateTime));
+            statement.setInt(7, customerId);
+            statement.setInt(8, userId);
+            statement.setInt(9, contactId);
+            statement.setInt(10, appointmentId);
+
+            int rowsUpdated = statement.executeUpdate();
+            if (rowsUpdated > 0) {
+                System.out.println("Successfully updated appointment ID: " + appointmentId);
+            } else {
+                System.out.println("Failed to update appointment ID: " + appointmentId);
+            }
+        }
+    }
 }
