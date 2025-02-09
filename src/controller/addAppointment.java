@@ -2,6 +2,7 @@ package controller;
 
 import helper.ContactData;
 import helper.CustomerData;
+import helper.UsersData; // Add this import to access UsersData
 import helper.AppointmentData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,6 +16,7 @@ import javafx.stage.Stage;
 import model.Appointments;
 import model.Customers;
 import model.Contacts;
+import model.Users; // Add this import for the Users model
 
 import java.io.IOException;
 import java.net.URL;
@@ -29,25 +31,39 @@ import java.util.stream.IntStream;
 
 public class addAppointment implements Initializable {
 
-    @FXML private TextField apptTitle;
-    @FXML private TextField apptDescription;
-    @FXML private TextField apptLocation;
-    @FXML private TextField apptType;
-    @FXML private DatePicker apptStartDate;
-    @FXML private ChoiceBox<LocalTime> apptStartTime;
-    @FXML private DatePicker apptEndDate;
-    @FXML private ChoiceBox<LocalTime> apptEndTime;
-    @FXML private ComboBox<String> apptCustomerID;  // Change this to ComboBox<String> for displaying names with IDs
-    @FXML private ComboBox<Integer> apptUserID;
-    @FXML private ComboBox<String> apptContactID;  // Change this to ComboBox<String> for displaying contact names with IDs
-    @FXML private Button addApptSave;
-    @FXML private Button addApptCancel;
+    @FXML
+    private TextField apptTitle;
+    @FXML
+    private TextField apptDescription;
+    @FXML
+    private TextField apptLocation;
+    @FXML
+    private TextField apptType;
+    @FXML
+    private DatePicker apptStartDate;
+    @FXML
+    private ChoiceBox<LocalTime> apptStartTime;
+    @FXML
+    private DatePicker apptEndDate;
+    @FXML
+    private ChoiceBox<LocalTime> apptEndTime;
+    @FXML
+    private ComboBox<String> apptCustomerID;  // Change this to ComboBox<String> for displaying names with IDs
+    @FXML
+    private ComboBox<String> apptUserID;    // ComboBox for user ID
+    @FXML
+    private ComboBox<String> apptContactID;  // Change this to ComboBox<String> for displaying contact names with IDs
+    @FXML
+    private Button addApptSave;
+    @FXML
+    private Button addApptCancel;
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         populateTimeChoiceBoxes();
         populateContactComboBox();  // Populate the Contact ID ComboBox
         populateCustomerComboBox(); // Populate the Customer ID ComboBox with customer names
+        populateUserComboBox();     // Populate the User ID ComboBox with user names
     }
 
     /**
@@ -103,6 +119,24 @@ public class addAppointment implements Initializable {
     }
 
     /**
+     * Populates the apptUserID ComboBox with the user names and IDs.
+     */
+    private void populateUserComboBox() {
+        try {
+            // Retrieve the list of all users
+            List<Users> usersList = UsersData.getAllUsers();  // Ensure this method exists in your UsersData helper class
+            // Prepare the ComboBox with user names (and IDs if needed)
+            for (Users user : usersList) {
+                // Add the formatted string to the ComboBox to show both user name and ID
+                apptUserID.getItems().add(user.getUserName() + " (ID: " + user.getUserId() + ")");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Database Error", "Unable to retrieve user data.");
+        }
+    }
+
+    /**
      * Handles the save action when adding a new appointment.
      */
     @FXML
@@ -117,10 +151,14 @@ public class addAppointment implements Initializable {
             LocalTime startTime = apptStartTime.getValue();
             LocalDate endDate = apptEndDate.getValue();
             LocalTime endTime = apptEndTime.getValue();
+
             // Extract customer ID from the selected combo box entry (parse it from the string)
             String selectedCustomer = apptCustomerID.getValue();
             int customerId = Integer.parseInt(selectedCustomer.split(" \\(ID: ")[1].replace(")", ""));
-            Integer userId = apptUserID.getValue();
+
+            // Extract user ID from the selected combo box entry (parse it from the string)
+            String selectedUser = apptUserID.getValue();
+            int userId = Integer.parseInt(selectedUser.split(" \\(ID: ")[1].replace(")", ""));
 
             // Extract contact ID from the selected combo box entry (parse it from the string)
             String selectedContact = apptContactID.getValue();
@@ -129,7 +167,7 @@ public class addAppointment implements Initializable {
             // Validate input fields
             if (title.isEmpty() || description.isEmpty() || location.isEmpty() || type.isEmpty() ||
                     startDate == null || startTime == null || endDate == null || endTime == null ||
-                    customerId == 0 || userId == null || contactId == 0) {
+                    customerId == 0 || userId == 0 || contactId == 0) {
                 showAlert("Validation Error", "All fields must be filled.");
                 return;
             }
@@ -168,12 +206,15 @@ public class addAppointment implements Initializable {
             // Load the appointment.fxml file
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/appointment.fxml"));
             Parent root = loader.load();
+
             // Get the current stage
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+
             // Create a new scene and set it
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to return to Appointments.");
