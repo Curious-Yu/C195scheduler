@@ -1,6 +1,9 @@
 package controller;
 
 import helper.AppointmentData;
+import helper.ContactData;
+import helper.CustomerData;
+import helper.UsersData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -11,20 +14,25 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.Appointments;
+import model.Contacts;
+import model.Customers;
+import model.Users;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class modifyAppointment implements Initializable {
-
     @FXML private TextField apptID;
     @FXML private TextField apptTitle;
     @FXML private TextField apptDescription;
@@ -34,9 +42,9 @@ public class modifyAppointment implements Initializable {
     @FXML private ChoiceBox<LocalTime> apptStartTime;
     @FXML private DatePicker apptEndDate;
     @FXML private ChoiceBox<LocalTime> apptEndTime;
-    @FXML private ComboBox<Integer> apptCustomerID;
-    @FXML private ComboBox<Integer> apptUserID;
-    @FXML private ComboBox<Integer> apptContactID;
+    @FXML private ComboBox<String> apptCustomerID;
+    @FXML private ComboBox<String> apptUserID;
+    @FXML private ComboBox<String> apptContactID;
     @FXML private Button modifyApptSave;
     @FXML private Button modifyApptCancel;
 
@@ -45,29 +53,60 @@ public class modifyAppointment implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         populateTimeChoiceBoxes();
+        populateCustomerComboBox();
+        populateUserComboBox();
+        populateContactComboBox();
     }
 
-    /**
-     * Populates the time selection ChoiceBoxes with 5-minute increments.
-     */
     private void populateTimeChoiceBoxes() {
-        LocalTime startTime = LocalTime.of(0, 0); // Midnight
-        LocalTime endTime = LocalTime.of(23, 55); // Last available time
+        LocalTime startTime = LocalTime.of(0, 0);
+        LocalTime endTime = LocalTime.of(23, 55);
 
-        // Generate time slots in 5-minute increments
         List<LocalTime> timeSlots = IntStream.iterate(0, i -> i + 5)
-                .limit(((24 * 60) / 5)) // 24 hours * 60 minutes / 5-minute intervals
+                .limit(((24 * 60) / 5))
                 .mapToObj(startTime::plusMinutes)
                 .collect(Collectors.toList());
 
-        // Populate the ChoiceBoxes
         apptStartTime.getItems().addAll(timeSlots);
         apptEndTime.getItems().addAll(timeSlots);
     }
 
-    /**
-     * Receives the selected appointment data and populates the fields.
-     */
+    private void populateCustomerComboBox() {
+        try {
+            List<Customers> customersList = CustomerData.getAllCustomers();
+            for (Customers customer : customersList) {
+                apptCustomerID.getItems().add(customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Database Error", "Unable to retrieve customer data.");
+        }
+    }
+
+    private void populateUserComboBox() {
+        try {
+            List<Users> usersList = UsersData.getAllUsers();
+            for (Users user : usersList) {
+                apptUserID.getItems().add(user.getUserName() + " (ID: " + user.getUserId() + ")");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Database Error", "Unable to retrieve user data.");
+        }
+    }
+
+    private void populateContactComboBox() {
+        try {
+            List<Contacts> contactsList = ContactData.getAllContacts();
+            for (Contacts contact : contactsList) {
+                apptContactID.getItems().add(contact.getContactName() + " (ID: " + contact.getContactId() + ")");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Database Error", "Unable to retrieve contact data.");
+        }
+    }
+
     public void setAppointmentData(Appointments appointment) {
         this.selectedAppointment = appointment;
 
@@ -80,18 +119,19 @@ public class modifyAppointment implements Initializable {
         apptStartTime.setValue(appointment.getLocalStart().toLocalTime());
         apptEndDate.setValue(appointment.getLocalEnd().toLocalDate());
         apptEndTime.setValue(appointment.getLocalEnd().toLocalTime());
-        apptCustomerID.setValue(appointment.getCustomerId());
-        apptUserID.setValue(appointment.getUserId());
-        apptContactID.setValue(appointment.getContactId());
+
+        apptCustomerID.setValue(getComboBoxFormat(appointment.getCustomerId(), "Customer"));
+        apptUserID.setValue(getComboBoxFormat(appointment.getUserId(), "User"));
+        apptContactID.setValue(getComboBoxFormat(appointment.getContactId(), "Contact"));
     }
 
-    /**
-     * Handles saving the modified appointment.
-     */
+    private String getComboBoxFormat(int id, String type) {
+        return type + " (ID: " + id + ")";
+    }
+
     @FXML
     public void ModifyApptSaveAction(ActionEvent actionEvent) {
         try {
-            // Retrieve user input
             String title = apptTitle.getText();
             String description = apptDescription.getText();
             String location = apptLocation.getText();
@@ -100,76 +140,71 @@ public class modifyAppointment implements Initializable {
             LocalTime startTime = apptStartTime.getValue();
             LocalDate endDate = apptEndDate.getValue();
             LocalTime endTime = apptEndTime.getValue();
-            Integer customerId = apptCustomerID.getValue();
-            Integer userId = apptUserID.getValue();
-            Integer contactId = apptContactID.getValue();
+            String selectedCustomer = apptCustomerID.getValue();
+            String selectedUser = apptUserID.getValue();
+            String selectedContact = apptContactID.getValue();
             int appointmentId = Integer.parseInt(apptID.getText());
 
-            // Validate input fields
             if (title.isEmpty() || description.isEmpty() || location.isEmpty() || type.isEmpty() ||
                     startDate == null || startTime == null || endDate == null || endTime == null ||
-                    customerId == null || userId == null || contactId == null) {
+                    selectedCustomer == null || selectedUser == null || selectedContact == null) {
                 showAlert("Validation Error", "All fields must be filled.");
                 return;
             }
 
-            // Convert LocalDate and LocalTime to LocalDateTime
-            LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
-            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+            int customerId = Integer.parseInt(selectedCustomer.split(" \\(ID: ")[1].replace(")", ""));
+            int userId = Integer.parseInt(selectedUser.split(" \\(ID: ")[1].replace(")", ""));
+            int contactId = Integer.parseInt(selectedContact.split(" \\(ID: ")[1].replace(")", ""));
 
-            // Ensure end time is after start time
-            if (endDateTime.isBefore(startDateTime)) {
-                showAlert("Validation Error", "End time must be after start time.");
+            ZonedDateTime startET = ZonedDateTime.of(LocalDateTime.of(startDate, startTime), ZoneId.systemDefault())
+                    .withZoneSameInstant(ZoneId.of("America/New_York"));
+            ZonedDateTime endET = ZonedDateTime.of(LocalDateTime.of(endDate, endTime), ZoneId.systemDefault())
+                    .withZoneSameInstant(ZoneId.of("America/New_York"));
+
+            if (startET.toLocalTime().isBefore(LocalTime.of(8, 0)) || endET.toLocalTime().isAfter(LocalTime.of(22, 0))) {
+                showAlert("Validation Error", "Appointments must be between 8 AM and 10 PM Eastern Time.");
                 return;
             }
 
-            // Update the appointment in the database
-            AppointmentData.updateAppointment(appointmentId, title, description, location, type, startDateTime, endDateTime, customerId, userId, contactId);
+            if (startDate.getDayOfWeek() == DayOfWeek.SATURDAY || startDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                showAlert("Validation Error", "Appointments cannot be scheduled on weekends.");
+                return;
+            }
 
-            // Show success message
+            if (AppointmentData.checkForOverlappingAppointments(startET.toLocalDateTime(), endET.toLocalDateTime(), customerId)) {
+                showAlert("Validation Error", "Customer already has an overlapping appointment.");
+                return;
+            }
+
+            AppointmentData.updateAppointment(appointmentId, title, description, location, type,
+                    startET.toLocalDateTime(), endET.toLocalDateTime(), customerId, userId, contactId);
+
             showAlert("Success", "Appointment successfully modified!");
+            navigateToAppointmentView(actionEvent);
 
-            // Return to appointment screen
-            ReturnToAppointmentScreen(actionEvent);
-        } catch (SQLException e) {
+        } catch (SQLException | NumberFormatException e) {
             e.printStackTrace();
-            showAlert("Database Error", "An error occurred while updating the appointment.");
+            showAlert("Error", "An error occurred while updating the appointment.");
         }
     }
 
-    /**
-     * Handles the cancel action by returning to the appointment page.
-     */
     @FXML
     public void ModifyApptCancelAction(ActionEvent actionEvent) {
-        ReturnToAppointmentScreen(actionEvent);
+        navigateToAppointmentView(actionEvent);
     }
 
-    /**
-     * Returns the user to the appointment screen.
-     */
-    private void ReturnToAppointmentScreen(ActionEvent actionEvent) {
+    private void navigateToAppointmentView(ActionEvent actionEvent) {
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/appointment.fxml"));
-            Parent root = loader.load();
+            Parent root = FXMLLoader.load(getClass().getResource("/view/appointment.fxml"));
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-            Scene scene = new Scene(root);
-            stage.setScene(scene);
+            stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
-            e.printStackTrace();
             showAlert("Error", "Unable to return to the Appointments.");
         }
     }
 
-    /**
-     * Displays an alert with the given title and message.
-     */
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.INFORMATION);
-        alert.setTitle(title);
-        alert.setHeaderText(null);
-        alert.setContentText(message);
-        alert.showAndWait();
+        new Alert(Alert.AlertType.INFORMATION, message, ButtonType.OK).showAndWait();
     }
 }

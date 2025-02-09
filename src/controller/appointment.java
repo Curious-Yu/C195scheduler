@@ -117,12 +117,18 @@ public class appointment {
     }
 
     public void modifyAppointmentActionButton(ActionEvent actionEvent) {
-        // Code for modifying an existing appointment
+        // Get the selected appointment
+        Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
+
+        // Check if an appointment is selected
+        if (selectedAppointment == null) {
+            showAlert("No Selection", "Please select an appointment to modify.");
+            return;
+        }
+
         try {
-
-            // Load the addAppointment.fxml file
+            // Load the modifyAppointment.fxml file
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyAppointment.fxml"));
-
             if (loader.getLocation() == null) {
                 showAlert("Error", "modifyAppointment.fxml not found. Please check the file path.");
                 return;
@@ -130,16 +136,17 @@ public class appointment {
 
             Parent root = loader.load();
 
-            // Get the current stage
-            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            // Get the controller of the modifyAppointment scene
+            modifyAppointment controller = loader.getController();
+            controller.setAppointmentData(selectedAppointment); // Pass the selected appointment data
 
-            // Create a new scene and set it
+            // Get the current stage and set the new scene
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
 
-            System.out.println("Successfully opened modifyAppointment.fxml");
-
+            System.out.println("Successfully opened modifyAppointment.fxml with selected appointment data.");
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to open the Modify Appointment window.");
@@ -274,5 +281,4 @@ public class appointment {
         alert.setContentText(message);
         alert.showAndWait();
     }
-
 }
