@@ -24,7 +24,7 @@
                     <VBox.margin>
                         <Insets bottom="20.0" />
                     </VBox.margin>
-            </Button>
+                </Button>
                 <Button fx:id="modifyAppointmentButton" mnemonicParsing="false" onAction="#modifyAppointmentActionButton" prefHeight="30.0" prefWidth="140.0" text="Modify Appointment">
                     <VBox.margin>
                         <Insets bottom="20.0" />
@@ -33,9 +33,9 @@
             </children>
         </VBox>
         <RadioButton fx:id="allTimeRadio" layoutX="353.0" layoutY="69.0" mnemonicParsing="false" onAction="#OnAllTimeRadio" selected="true" text="All Time">
-         <toggleGroup>
-            <ToggleGroup fx:id="appointmentToggle" />
-         </toggleGroup></RadioButton>
+            <toggleGroup>
+                <ToggleGroup fx:id="appointmentToggle" />
+            </toggleGroup></RadioButton>
         <RadioButton fx:id="currentMonthRadio" layoutX="481.0" layoutY="69.0" mnemonicParsing="false" onAction="#OnCurrentMonthRadio" text="Current Month" toggleGroup="$appointmentToggle" />
         <RadioButton fx:id="currentWeekRadio" layoutX="638.0" layoutY="69.0" mnemonicParsing="false" onAction="#OnCurrentWeekRadio" text="Current Week" toggleGroup="$appointmentToggle" />
         <TableView fx:id="appointmentTable" layoutX="14.0" layoutY="113.0" prefHeight="340.0" prefWidth="897.0">

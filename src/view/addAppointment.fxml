@@ -123,7 +123,7 @@
                     <VBox.margin>
                         <Insets bottom="14.0" />
                     </VBox.margin>
-            </TextField>
+                </TextField>
                 <TextField fx:id="apptType">
                     <font>
                         <Font size="18.0" />
@@ -147,7 +147,7 @@
                     <VBox.margin>
                         <Insets bottom="25.0" />
                     </VBox.margin>
-            </ChoiceBox>
+                </ChoiceBox>
             </children></VBox>
         <Button fx:id="addApptSave" layoutX="107.0" layoutY="531.0" mnemonicParsing="false" onAction="#AddApptSaveAction" prefWidth="125.0" text="Save">
             <font>
@@ -159,45 +159,45 @@
                 <Font size="18.0" />
             </font>
         </Button>
-      <VBox alignment="TOP_RIGHT" layoutX="596.0" layoutY="327.0" prefHeight="159.0" prefWidth="155.0">
-         <children>
-            <Label layoutX="122.0" layoutY="151.0" text="Contact ID :">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <VBox.margin>
-                  <Insets bottom="20.0" />
-               </VBox.margin>
-            </Label>
-            <Label layoutX="122.0" layoutY="313.0" text="Customer ID :">
-               <font>
-                  <Font size="18.0" />
-               </font>
-               <VBox.margin>
-                  <Insets bottom="20.0" />
-               </VBox.margin>
-            </Label>
-            <Label layoutX="122.0" layoutY="340.0" text="User ID :">
-               <font>
-                  <Font size="18.0" />
-               </font>
-            </Label>
-         </children>
-      </VBox>
-      <VBox layoutX="774.0" layoutY="331.0" prefHeight="152.0" prefWidth="201.0">
-         <children>
-            <ComboBox fx:id="apptContactID" prefWidth="150.0">
-               <VBox.margin>
-                  <Insets bottom="22.0" />
-               </VBox.margin>
-            </ComboBox>
-            <ComboBox fx:id="apptCustomerID" prefWidth="150.0">
-               <VBox.margin>
-                  <Insets bottom="22.0" />
-               </VBox.margin>
-            </ComboBox>
-            <ComboBox fx:id="apptUserID" prefWidth="150.0" />
-         </children>
-      </VBox>
+        <VBox alignment="TOP_RIGHT" layoutX="596.0" layoutY="327.0" prefHeight="159.0" prefWidth="155.0">
+            <children>
+                <Label layoutX="122.0" layoutY="151.0" text="Contact ID :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <Label layoutX="122.0" layoutY="313.0" text="Customer ID :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <Label layoutX="122.0" layoutY="340.0" text="User ID :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                </Label>
+            </children>
+        </VBox>
+        <VBox layoutX="774.0" layoutY="331.0" prefHeight="152.0" prefWidth="201.0">
+            <children>
+                <ComboBox fx:id="apptContactID" prefWidth="150.0">
+                    <VBox.margin>
+                        <Insets bottom="22.0" />
+                    </VBox.margin>
+                </ComboBox>
+                <ComboBox fx:id="apptCustomerID" prefWidth="150.0">
+                    <VBox.margin>
+                        <Insets bottom="22.0" />
+                    </VBox.margin>
+                </ComboBox>
+                <ComboBox fx:id="apptUserID" prefWidth="150.0" />
+            </children>
+        </VBox>
     </children>
 </AnchorPane>
