@@ -4,6 +4,7 @@ import helper.AppointmentData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
+import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
@@ -12,12 +13,17 @@ import javafx.stage.Stage;
 import model.Appointments;
 
 import java.io.IOException;
+import java.net.URL;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
+import java.util.ResourceBundle;
+import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
-public class modifyAppointment {
+public class modifyAppointment implements Initializable {
 
     @FXML private TextField apptID;
     @FXML private TextField apptTitle;
@@ -35,6 +41,29 @@ public class modifyAppointment {
     @FXML private Button modifyApptCancel;
 
     private Appointments selectedAppointment;
+
+    @Override
+    public void initialize(URL url, ResourceBundle resourceBundle) {
+        populateTimeChoiceBoxes();
+    }
+
+    /**
+     * Populates the time selection ChoiceBoxes with 5-minute increments.
+     */
+    private void populateTimeChoiceBoxes() {
+        LocalTime startTime = LocalTime.of(0, 0); // Midnight
+        LocalTime endTime = LocalTime.of(23, 55); // Last available time
+
+        // Generate time slots in 5-minute increments
+        List<LocalTime> timeSlots = IntStream.iterate(0, i -> i + 5)
+                .limit(((24 * 60) / 5)) // 24 hours * 60 minutes / 5-minute intervals
+                .mapToObj(startTime::plusMinutes)
+                .collect(Collectors.toList());
+
+        // Populate the ChoiceBoxes
+        apptStartTime.getItems().addAll(timeSlots);
+        apptEndTime.getItems().addAll(timeSlots);
+    }
 
     /**
      * Receives the selected appointment data and populates the fields.
@@ -80,7 +109,6 @@ public class modifyAppointment {
             if (title.isEmpty() || description.isEmpty() || location.isEmpty() || type.isEmpty() ||
                     startDate == null || startTime == null || endDate == null || endTime == null ||
                     customerId == null || userId == null || contactId == null) {
-
                 showAlert("Validation Error", "All fields must be filled.");
                 return;
             }
@@ -103,7 +131,6 @@ public class modifyAppointment {
 
             // Return to appointment screen
             ReturnToAppointmentScreen(actionEvent);
-
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Database Error", "An error occurred while updating the appointment.");
