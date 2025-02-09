@@ -1,5 +1,6 @@
 package controller;
 
+import helper.ContactData;
 import helper.AppointmentData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -11,7 +12,6 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import model.Appointments;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -42,6 +42,7 @@ public class addAppointment implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         populateTimeChoiceBoxes();
+        populateContactComboBox();  // Populate the Contact ID ComboBox
     }
 
     /**
@@ -60,6 +61,19 @@ public class addAppointment implements Initializable {
         // Populate the ChoiceBoxes
         apptStartTime.getItems().addAll(timeSlots);
         apptEndTime.getItems().addAll(timeSlots);
+    }
+
+    /**
+     * Populates the apptContactID ComboBox with the Contact IDs from the database.
+     */
+    private void populateContactComboBox() {
+        try {
+            List<Integer> contactIds = ContactData.getContactIds();
+            apptContactID.getItems().addAll(contactIds);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Database Error", "Unable to retrieve contact IDs.");
+        }
     }
 
     /**
@@ -108,6 +122,7 @@ public class addAppointment implements Initializable {
             // Close the window
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             stage.close();
+
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Database Error", "An error occurred while saving the appointment.");
@@ -131,6 +146,7 @@ public class addAppointment implements Initializable {
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
+
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to return to Appointments.");
