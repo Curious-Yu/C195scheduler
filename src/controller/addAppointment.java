@@ -2,7 +2,7 @@ package controller;
 
 import helper.ContactData;
 import helper.CustomerData;
-import helper.UsersData; // Add this import to access UsersData
+import helper.UsersData;
 import helper.AppointmentData;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -16,21 +16,23 @@ import javafx.stage.Stage;
 import model.Appointments;
 import model.Customers;
 import model.Contacts;
-import model.Users; // Add this import for the Users model
+import model.Users;
 
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 public class addAppointment implements Initializable {
-
     @FXML
     private TextField apptTitle;
     @FXML
@@ -48,11 +50,11 @@ public class addAppointment implements Initializable {
     @FXML
     private ChoiceBox<LocalTime> apptEndTime;
     @FXML
-    private ComboBox<String> apptCustomerID;  // Change this to ComboBox<String> for displaying names with IDs
+    private ComboBox<String> apptCustomerID;
     @FXML
-    private ComboBox<String> apptUserID;    // ComboBox for user ID
+    private ComboBox<String> apptUserID;
     @FXML
-    private ComboBox<String> apptContactID;  // Change this to ComboBox<String> for displaying contact names with IDs
+    private ComboBox<String> apptContactID;
     @FXML
     private Button addApptSave;
     @FXML
@@ -61,37 +63,26 @@ public class addAppointment implements Initializable {
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         populateTimeChoiceBoxes();
-        populateContactComboBox();  // Populate the Contact ID ComboBox
-        populateCustomerComboBox(); // Populate the Customer ID ComboBox with customer names
-        populateUserComboBox();     // Populate the User ID ComboBox with user names
+        populateContactComboBox();
+        populateCustomerComboBox();
+        populateUserComboBox();
     }
 
-    /**
-     * Populates the time selection ChoiceBoxes with 5-minute increments.
-     */
     private void populateTimeChoiceBoxes() {
-        LocalTime startTime = LocalTime.of(0, 0); // Midnight
-        LocalTime endTime = LocalTime.of(23, 55); // Last available time
-        // Generate time slots in 5-minute increments
-        List<LocalTime> timeSlots = IntStream.iterate(0, i -> i + 5)
-                .limit(((24 * 60) / 5)) // 24 hours * 60 minutes / 5-minute intervals
+        LocalTime startTime = LocalTime.of(0, 0);  // Start at 12:00 AM (midnight)
+        LocalTime endTime = LocalTime.of(23, 55);  // End at 11:55 PM
+        List<LocalTime> timeSlots = IntStream.iterate(0, i -> i + 5)  // Step by 5 minutes
+                .limit(((24 * 60) / 5))  // Generate time slots for a full 24-hour period
                 .mapToObj(startTime::plusMinutes)
                 .collect(Collectors.toList());
-        // Populate the ChoiceBoxes
         apptStartTime.getItems().addAll(timeSlots);
         apptEndTime.getItems().addAll(timeSlots);
     }
 
-    /**
-     * Populates the apptContactID ComboBox with the contact names and IDs.
-     */
     private void populateContactComboBox() {
         try {
-            // Retrieve the list of all contacts
             List<Contacts> contactsList = ContactData.getAllContacts();
-            // Prepare the ComboBox with contact names (and IDs if needed)
             for (Contacts contact : contactsList) {
-                // Format the string to show both name and ID
                 apptContactID.getItems().add(contact.getContactName() + " (ID: " + contact.getContactId() + ")");
             }
         } catch (SQLException e) {
@@ -100,16 +91,10 @@ public class addAppointment implements Initializable {
         }
     }
 
-    /**
-     * Populates the apptCustomerID ComboBox with the customer names and IDs.
-     */
     private void populateCustomerComboBox() {
         try {
-            // Retrieve the list of all customers
             List<Customers> customersList = CustomerData.getAllCustomers();
-            // Prepare the ComboBox with customer names (and IDs if needed)
             for (Customers customer : customersList) {
-                // Format the string to show both name and ID
                 apptCustomerID.getItems().add(customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
             }
         } catch (SQLException e) {
@@ -118,16 +103,10 @@ public class addAppointment implements Initializable {
         }
     }
 
-    /**
-     * Populates the apptUserID ComboBox with the user names and IDs.
-     */
     private void populateUserComboBox() {
         try {
-            // Retrieve the list of all users
-            List<Users> usersList = UsersData.getAllUsers();  // Ensure this method exists in your UsersData helper class
-            // Prepare the ComboBox with user names (and IDs if needed)
+            List<Users> usersList = UsersData.getAllUsers();
             for (Users user : usersList) {
-                // Add the formatted string to the ComboBox to show both user name and ID
                 apptUserID.getItems().add(user.getUserName() + " (ID: " + user.getUserId() + ")");
             }
         } catch (SQLException e) {
@@ -135,14 +114,9 @@ public class addAppointment implements Initializable {
             showAlert("Database Error", "Unable to retrieve user data.");
         }
     }
-
-    /**
-     * Handles the save action when adding a new appointment.
-     */
     @FXML
     public void AddApptSaveAction(ActionEvent actionEvent) {
         try {
-            // Retrieve user input
             String title = apptTitle.getText();
             String description = apptDescription.getText();
             String location = apptLocation.getText();
@@ -151,79 +125,90 @@ public class addAppointment implements Initializable {
             LocalTime startTime = apptStartTime.getValue();
             LocalDate endDate = apptEndDate.getValue();
             LocalTime endTime = apptEndTime.getValue();
-
-            // Extract customer ID from the selected combo box entry (parse it from the string)
             String selectedCustomer = apptCustomerID.getValue();
-            int customerId = Integer.parseInt(selectedCustomer.split(" \\(ID: ")[1].replace(")", ""));
-
-            // Extract user ID from the selected combo box entry (parse it from the string)
             String selectedUser = apptUserID.getValue();
-            int userId = Integer.parseInt(selectedUser.split(" \\(ID: ")[1].replace(")", ""));
-
-            // Extract contact ID from the selected combo box entry (parse it from the string)
             String selectedContact = apptContactID.getValue();
-            int contactId = Integer.parseInt(selectedContact.split(" \\(ID: ")[1].replace(")", ""));
 
-            // Validate input fields
+            // Validation for empty fields
             if (title.isEmpty() || description.isEmpty() || location.isEmpty() || type.isEmpty() ||
                     startDate == null || startTime == null || endDate == null || endTime == null ||
-                    customerId == 0 || userId == 0 || contactId == 0) {
+                    selectedCustomer == null || selectedUser == null || selectedContact == null) {
                 showAlert("Validation Error", "All fields must be filled.");
                 return;
             }
 
-            // Convert LocalDate and LocalTime to LocalDateTime
-            LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
-            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+            // Parse IDs
+            int customerId = Integer.parseInt(selectedCustomer.split(" \\(ID: ")[1].replace(")", ""));
+            int userId = Integer.parseInt(selectedUser.split(" \\(ID: ")[1].replace(")", ""));
+            int contactId = Integer.parseInt(selectedContact.split(" \\(ID: ")[1].replace(")", ""));
 
-            // Ensure end time is after start time
-            if (endDateTime.isBefore(startDateTime)) {
-                showAlert("Validation Error", "End time must be after start time.");
+            // Check for 0 or invalid IDs
+            if (customerId == 0 || userId == 0 || contactId == 0) {
+                showAlert("Validation Error", "Invalid customer, user, or contact ID.");
                 return;
             }
 
-            // Insert the new appointment into the database
+            // Convert start and end times to Eastern Time Zone for comparison
+            ZonedDateTime startET = ZonedDateTime.of(LocalDateTime.of(startDate, startTime), ZoneId.systemDefault())
+                    .withZoneSameInstant(ZoneId.of("America/New_York"));
+            ZonedDateTime endET = ZonedDateTime.of(LocalDateTime.of(endDate, endTime), ZoneId.systemDefault())
+                    .withZoneSameInstant(ZoneId.of("America/New_York"));
+
+            // Check if appointment is within business hours (8:00 AM to 10:00 PM Eastern Time)
+            LocalTime businessStart = LocalTime.of(8, 0);  // 8:00 AM Eastern Time
+            LocalTime businessEnd = LocalTime.of(22, 0);  // 10:00 PM Eastern Time
+            if (startET.toLocalTime().isBefore(businessStart) || endET.toLocalTime().isAfter(businessEnd)) {
+                showAlert("Validation Error", "Appointments must be scheduled between 8 AM and 10 PM Eastern Time.");
+                return;
+            }
+
+            // Check if the appointment is on a weekend (Saturday or Sunday)
+            if (startDate.getDayOfWeek() == DayOfWeek.SATURDAY || startDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                showAlert("Validation Error", "Appointments cannot be scheduled on weekends.");
+                return;
+            }
+
+            // Check for overlapping appointments
+            LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
+            LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
+            if (AppointmentData.checkForOverlappingAppointments(startDateTime, endDateTime, customerId)) {
+                showAlert("Validation Error", "Customer already has an overlapping appointment.");
+                return;
+            }
+
+            // Insert the appointment into the database
             AppointmentData.insertAppointment(title, description, location, type, startDateTime, endDateTime, customerId, userId, contactId);
-
-            // Show success message
             showAlert("Success", "Appointment successfully added!");
+            navigateToAppointmentView(actionEvent);
 
-            // Close the window
-            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-            stage.close();
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Database Error", "An error occurred while saving the appointment.");
+        } catch (NumberFormatException e) {
+            // Catch parsing errors if any of the IDs cannot be parsed
+            showAlert("Validation Error", "Invalid input in one or more fields.");
         }
     }
 
-    /**
-     * Handles the cancel action by closing the add appointment window and going back to the appointment page.
-     */
     @FXML
     public void AddApptCancelAction(ActionEvent actionEvent) {
+        navigateToAppointmentView(actionEvent);
+    }
+
+    private void navigateToAppointmentView(ActionEvent actionEvent) {
         try {
-            // Load the appointment.fxml file
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/appointment.fxml"));
             Parent root = loader.load();
-
-            // Get the current stage
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-
-            // Create a new scene and set it
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
-
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to return to Appointments.");
         }
     }
 
-    /**
-     * Displays an alert with the given title and message.
-     */
     private void showAlert(String title, String message) {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);

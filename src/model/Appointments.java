@@ -2,6 +2,7 @@ package model;
 
 import javafx.beans.property.*;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Appointments {
     private IntegerProperty appointmentId;
@@ -150,4 +151,5 @@ public class Appointments {
     public void setContactId(int contactId) {
         this.contactId.set(contactId);
     }
+
 }

@@ -187,4 +187,42 @@ public abstract class AppointmentData {
             }
         }
     }
+
+    public static boolean checkForOverlappingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime, int customerId) {
+        boolean hasOverlap = false;
+
+        if (JDBC.connection == null) {
+            JDBC.openConnection();
+        }
+
+        // SQL query to check for overlapping appointments
+        String sql = "SELECT * FROM client_schedule.appointments " +
+                "WHERE Customer_ID = ? AND (" +
+                "(Start BETWEEN ? AND ?) OR " +
+                "(End BETWEEN ? AND ?) OR " +
+                "(? BETWEEN Start AND End) OR " +
+                "(? BETWEEN Start AND End))";
+
+        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
+            // Set parameters: customer ID, start and end times
+            statement.setInt(1, customerId);
+            statement.setTimestamp(2, java.sql.Timestamp.valueOf(startDateTime));
+            statement.setTimestamp(3, java.sql.Timestamp.valueOf(endDateTime));
+            statement.setTimestamp(4, java.sql.Timestamp.valueOf(startDateTime));
+            statement.setTimestamp(5, java.sql.Timestamp.valueOf(endDateTime));
+            statement.setTimestamp(6, java.sql.Timestamp.valueOf(startDateTime));
+            statement.setTimestamp(7, java.sql.Timestamp.valueOf(endDateTime));
+
+            ResultSet result = statement.executeQuery();
+
+            // If the result set has any rows, it means there is an overlapping appointment
+            if (result.next()) {
+                hasOverlap = true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return hasOverlap;
+    }
 }
