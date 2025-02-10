@@ -1,6 +1,9 @@
 package helper;
 
 import model.Customers;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -33,24 +36,17 @@ public class CustomerData {
     /**
      * Retrieves a list of all customers with their ID, name, address, postal code, phone, and division ID.
      *
-     * @return A List of Customers objects.
+     * @return An ObservableList of Customers objects.
      * @throws SQLException If there is an issue executing the SQL query.
      */
-    public static List<Customers> getAllCustomers() throws SQLException {
-        List<Customers> customersList = new ArrayList<>();
+    public static ObservableList<Customers> getAllCustomers() throws SQLException {
+        ObservableList<Customers> customersList = FXCollections.observableArrayList();
         String sql = "SELECT * FROM customers";
         PreparedStatement statement = JDBC.connection.prepareStatement(sql);
         ResultSet result = statement.executeQuery();
         while (result.next()) {
-            int customerId = result.getInt("Customer_ID");
-            String customerName = result.getString("Customer_Name");
-            String address = result.getString("Address");
-            String postalCode = result.getString("Postal_Code");
-            String phone = result.getString("Phone");
-            int divisionId = result.getInt("Division_ID");
-
-            // Create a new Customers object and add it to the list
-            Customers customer = new Customers(customerId, customerName, address, postalCode, phone, divisionId);
+            // Create a new Customers object using the ResultSet constructor
+            Customers customer = new Customers(result);
             customersList.add(customer);
         }
         return customersList;

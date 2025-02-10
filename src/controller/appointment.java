@@ -1,6 +1,9 @@
 package controller;
 
 import helper.AppointmentData;
+import helper.CountryData;
+import helper.CustomerData;
+import helper.FirstLevelDivisionData;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -13,6 +16,9 @@ import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
 import model.Appointments;
+import model.Countries;
+import model.Customers;
+import model.FirstLevelDivisions;
 
 import java.io.IOException;
 import java.sql.SQLException;
@@ -60,15 +66,36 @@ public class appointment {
     @FXML
     public TableColumn<Appointments, Integer> contactIdColumn;
     @FXML
-    public Button customersButton;
-    @FXML
     public Button reportsButton;
     @FXML
     public Button exitButton;
+    @FXML
+    public TableView<Customers> customerTable; // Specify the correct type for the TableView
+    @FXML
+    public TableColumn<Customers, Integer> customerIDColumn;
+    @FXML
+    public TableColumn<Customers, String> nameColumn;
+    @FXML
+    public TableColumn<Customers, String> addressColumn;
+    @FXML
+    public TableColumn<Customers, String> postalCodeColumn;
+    @FXML
+    public TableColumn<Customers, String> divisionIDColumn;
+    @FXML
+    public TableColumn<Customers, String> phoneColumn;
+    @FXML
+    public TableColumn<Customers, String> stateColumn;
+    @FXML
+    public TableColumn<Customers, String> countryColumn;
+    public Button addCustomerButton;
+    public Button modifyCustomerButton;
+    public Button deleteCustomerButton;
+
+
 
     @FXML
     public void initialize() {
-        // Initialize TableView columns
+        // Initialize Appointment TableView columns
         appointmentIDColumn.setCellValueFactory(new PropertyValueFactory<>("appointmentId"));
         titleColumn.setCellValueFactory(new PropertyValueFactory<>("title"));
         descriptionColumn.setCellValueFactory(new PropertyValueFactory<>("description"));
@@ -90,6 +117,78 @@ public class appointment {
             showAlert("Error", "Unable to load appointments.");
         }
 
+        // Initialize Customer TableView columns with the correct PropertyValueFactory
+        customerIDColumn.setCellValueFactory(new PropertyValueFactory<>("customerId"));
+        nameColumn.setCellValueFactory(new PropertyValueFactory<>("customerName"));
+        addressColumn.setCellValueFactory(new PropertyValueFactory<>("address"));
+        postalCodeColumn.setCellValueFactory(new PropertyValueFactory<>("postalCode"));
+        divisionIDColumn.setCellValueFactory(new PropertyValueFactory<>("divisionId"));
+        phoneColumn.setCellValueFactory(new PropertyValueFactory<>("phone"));
+
+        // Set the stateColumn property value factory
+        stateColumn.setCellValueFactory(cellData -> {
+            try {
+                // Ensure that the value is of type Customer
+                Customers customer = cellData.getValue();
+
+                // Get the divisionId from the customer data
+                int divisionId = customer.getDivisionId();
+
+                // Retrieve the corresponding division (state) using the divisionId
+                FirstLevelDivisions division = FirstLevelDivisionData.getFirstLevelDivisionById(divisionId);
+
+                // Return the division (state) name, if found, otherwise return "Unknown"
+                return new SimpleStringProperty(division != null ? division.getDivision() : "Unknown");
+            } catch (SQLException e) {
+                // Print stack trace and more detailed error information
+                e.printStackTrace();
+                return new SimpleStringProperty("SQL Error: " + e.getMessage());
+            } catch (ClassCastException e) {
+                // Handle case where cellData is not a Customer object
+                e.printStackTrace();
+                return new SimpleStringProperty("Invalid data type");
+            }
+        });
+
+        // Set the countryColumn property value factory
+        countryColumn.setCellValueFactory(cellData -> {
+            try {
+                // Ensure that the value is of type Customer
+                Customers customer = cellData.getValue();
+                int divisionId = customer.getDivisionId(); // Get the divisionId
+                FirstLevelDivisions division = FirstLevelDivisionData.getFirstLevelDivisionById(divisionId); // Get the division
+
+                if (division != null) {
+                    int countryId = division.getCountryId(); // Get the associated countryId
+                    Countries country = CountryData.getCountryById(countryId); // Retrieve the country using countryId
+                    return new SimpleStringProperty(country != null ? country.getCountry() : "Unknown");
+                } else {
+                    return new SimpleStringProperty("Unknown");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                return new SimpleStringProperty("SQL Error: " + e.getMessage());
+            }
+        });
+
+        // Load customer data into customerTable
+        try {
+            ObservableList<Customers> customers = CustomerData.getAllCustomers();
+            customerTable.setItems(customers);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error", "Unable to load customer data.");
+        }
+
+        // Load customer data into customerTable
+        try {
+            ObservableList<Customers> customers = CustomerData.getAllCustomers();
+            customerTable.setItems(customers);
+        } catch (SQLException e) {
+            e.printStackTrace();
+            showAlert("Error", "Unable to load customer data.");
+        }
+
         startsAtColumn.setCellValueFactory(cellData -> {
             LocalDateTime start = cellData.getValue().getLocalStart();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -101,7 +200,6 @@ public class appointment {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             return new SimpleStringProperty(end != null ? end.format(formatter) : "");
         });
-
     }
 
     private void checkUpcomingAppointments(ObservableList<Appointments> appointments) {
@@ -243,9 +341,6 @@ public class appointment {
         }
     }
 
-    public void customersActionButton(ActionEvent actionEvent) {
-        // Code for handling customers action
-    }
 
     public void reportsActionButton(ActionEvent actionEvent) {
         // Code for handling reports action
@@ -283,5 +378,14 @@ public class appointment {
         alert.setHeaderText(null);
         alert.setContentText(message);
         alert.showAndWait();
+    }
+
+    public void addCustomerActionButton(ActionEvent actionEvent) {
+    }
+
+    public void modifyCustomerActionButton(ActionEvent actionEvent) {
+    }
+
+    public void deleteCustomerActionButton(ActionEvent actionEvent) {
     }
 }

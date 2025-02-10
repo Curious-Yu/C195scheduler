@@ -1,7 +1,9 @@
 package model;
 
-public class Customers {
+import java.sql.ResultSet;
+import java.sql.SQLException;
 
+public class Customers {
     private int customerId;
     private String customerName;
     private String address;
@@ -9,7 +11,7 @@ public class Customers {
     private String phone;
     private int divisionId;
 
-    // Constructor
+    // Constructor with parameters
     public Customers(int customerId, String customerName, String address, String postalCode, String phone, int divisionId) {
         this.customerId = customerId;
         this.customerName = customerName;
@@ -17,6 +19,16 @@ public class Customers {
         this.postalCode = postalCode;
         this.phone = phone;
         this.divisionId = divisionId;
+    }
+
+    // Constructor that takes a ResultSet
+    public Customers(ResultSet result) throws SQLException {
+        this.customerId = result.getInt("Customer_ID");
+        this.customerName = result.getString("Customer_Name");
+        this.address = result.getString("Address");
+        this.postalCode = result.getString("Postal_Code");
+        this.phone = result.getString("Phone");
+        this.divisionId = result.getInt("Division_ID");
     }
 
     // Getters and Setters
@@ -67,5 +79,4 @@ public class Customers {
     public void setDivisionId(int divisionId) {
         this.divisionId = divisionId;
     }
-
 }
