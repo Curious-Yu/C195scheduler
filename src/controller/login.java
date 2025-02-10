@@ -136,9 +136,9 @@ public class login implements Initializable {
             String successTitle = bundle.getString("SuccessAlert"); // New property for success
             String successMessage = String.format(bundle.getString("SuccessMessage"), authenticatedUser.getUserName());
             showAlert(successTitle, successMessage); // Correct usage
-            // Proceed to open the appointment screen
+            // Proceed to open the mainpage screen
             try {
-                // Load the appointment.fxml scene
+                // Load the mainpage.fxml scene
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/appointment.fxml"));
                 Parent appointmentRoot = loader.load();
 
@@ -165,7 +165,7 @@ public class login implements Initializable {
             showAlert(alertTitle, alertMessage); // Correct usage
         }
 
-        // will need to open the appointment landing page here
+        // will need to open the mainpage landing page here
     }
 
     private void showAlert(String title, String message) {

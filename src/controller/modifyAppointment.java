@@ -172,7 +172,7 @@ public class modifyAppointment implements Initializable {
             }
 
             if (AppointmentData.checkForOverlappingAppointments(startET.toLocalDateTime(), endET.toLocalDateTime(), customerId)) {
-                showAlert("Validation Error", "Customer already has an overlapping appointment.");
+                showAlert("Validation Error", "Customer already has an overlapping mainpage.");
                 return;
             }
 
@@ -184,7 +184,7 @@ public class modifyAppointment implements Initializable {
 
         } catch (SQLException | NumberFormatException e) {
             e.printStackTrace();
-            showAlert("Error", "An error occurred while updating the appointment.");
+            showAlert("Error", "An error occurred while updating the mainpage.");
         }
     }
 

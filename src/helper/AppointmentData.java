@@ -115,7 +115,7 @@ public abstract class AppointmentData {
         return appointmentObservableList;
     }
 
-    // Method to delete an appointment by Appointment_ID
+    // Method to delete an mainpage by Appointment_ID
     public static void deleteAppointment(int appointmentId) throws SQLException {
         String sql = "DELETE FROM client_schedule.appointments WHERE Appointment_ID = ?";
 
@@ -124,7 +124,7 @@ public abstract class AppointmentData {
         statement.executeUpdate();
     }
 
-    // Method to insert a new appointment into the database
+    // Method to insert a new mainpage into the database
     public static void insertAppointment(String title, String description, String location, String type,
                                          LocalDateTime startDateTime, LocalDateTime endDateTime,
                                          Integer customerId, Integer userId, Integer contactId) throws SQLException {
@@ -148,14 +148,14 @@ public abstract class AppointmentData {
 
             int rowsInserted = statement.executeUpdate();
             if (rowsInserted > 0) {
-                System.out.println("Successfully added appointment.");
+                System.out.println("Successfully added mainpage.");
             } else {
-                System.out.println("Failed to add appointment.");
+                System.out.println("Failed to add mainpage.");
             }
         }
     }
 
-    // Method to update an existing appointment
+    // Method to update an existing mainpage
     public static void updateAppointment(int appointmentId, String title, String description, String location, String type,
                                          LocalDateTime startDateTime, LocalDateTime endDateTime,
                                          Integer customerId, Integer userId, Integer contactId) throws SQLException {
@@ -181,9 +181,9 @@ public abstract class AppointmentData {
 
             int rowsUpdated = statement.executeUpdate();
             if (rowsUpdated > 0) {
-                System.out.println("Successfully updated appointment ID: " + appointmentId);
+                System.out.println("Successfully updated mainpage ID: " + appointmentId);
             } else {
-                System.out.println("Failed to update appointment ID: " + appointmentId);
+                System.out.println("Failed to update mainpage ID: " + appointmentId);
             }
         }
     }
@@ -215,7 +215,7 @@ public abstract class AppointmentData {
 
             ResultSet result = statement.executeQuery();
 
-            // If the result set has any rows, it means there is an overlapping appointment
+            // If the result set has any rows, it means there is an overlapping mainpage
             if (result.next()) {
                 hasOverlap = true;
             }

@@ -27,7 +27,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
-public class appointment {
+public class mainpage {
 
     @FXML
     public Button addAppointmentButton;
@@ -209,14 +209,14 @@ public class appointment {
             long minutesUntilAppointment = ChronoUnit.MINUTES.between(now, appointmentStartTime);
 
             if (minutesUntilAppointment > 0 && minutesUntilAppointment <= 15) {
-                // Alert for an upcoming appointment within 15 minutes
-                String message = String.format("You have an upcoming appointment!\n" +
+                // Alert for an upcoming mainpage within 15 minutes
+                String message = String.format("You have an upcoming mainpage!\n" +
                                 "Appointment ID: %d\nDate: %s\nTime: %s",
                         appointment.getAppointmentId(),
                         appointmentStartTime.toLocalDate().toString(),
                         appointmentStartTime.toLocalTime().toString());
                 showAlert("Upcoming Appointment", message);
-                return; // Show alert only for the first upcoming appointment
+                return; // Show alert only for the first upcoming mainpage
             }
         }
 
@@ -247,7 +247,7 @@ public class appointment {
     public void modifyAppointmentActionButton(ActionEvent actionEvent) {
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
         if (selectedAppointment == null) {
-            showAlert("No Selection", "Please select an appointment to modify.");
+            showAlert("No Selection", "Please select an mainpage to modify.");
             return;
         }
 
@@ -265,7 +265,7 @@ public class appointment {
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
-            System.out.println("Successfully opened modifyAppointment.fxml with selected appointment data.");
+            System.out.println("Successfully opened modifyAppointment.fxml with selected mainpage data.");
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to open the Modify Appointment window.");
@@ -276,7 +276,7 @@ public class appointment {
         try {
             Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
             if (selectedAppointment == null) {
-                showAlert("No Selection", "Please select an appointment to delete.");
+                showAlert("No Selection", "Please select an mainpage to delete.");
                 return;
             }
             int appointmentId = selectedAppointment.getAppointmentId();
@@ -307,7 +307,7 @@ public class appointment {
             }
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Error", "An error occurred while deleting the appointment.");
+            showAlert("Error", "An error occurred while deleting the mainpage.");
         }
     }
 

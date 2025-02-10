@@ -154,7 +154,7 @@ public class addAppointment implements Initializable {
             ZonedDateTime endET = ZonedDateTime.of(LocalDateTime.of(endDate, endTime), ZoneId.systemDefault())
                     .withZoneSameInstant(ZoneId.of("America/New_York"));
 
-            // Check if appointment is within business hours (8:00 AM to 10:00 PM Eastern Time)
+            // Check if mainpage is within business hours (8:00 AM to 10:00 PM Eastern Time)
             LocalTime businessStart = LocalTime.of(8, 0);  // 8:00 AM Eastern Time
             LocalTime businessEnd = LocalTime.of(22, 0);  // 10:00 PM Eastern Time
             if (startET.toLocalTime().isBefore(businessStart) || endET.toLocalTime().isAfter(businessEnd)) {
@@ -162,7 +162,7 @@ public class addAppointment implements Initializable {
                 return;
             }
 
-            // Check if the appointment is on a weekend (Saturday or Sunday)
+            // Check if the mainpage is on a weekend (Saturday or Sunday)
             if (startDate.getDayOfWeek() == DayOfWeek.SATURDAY || startDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
                 showAlert("Validation Error", "Appointments cannot be scheduled on weekends.");
                 return;
@@ -172,18 +172,18 @@ public class addAppointment implements Initializable {
             LocalDateTime startDateTime = LocalDateTime.of(startDate, startTime);
             LocalDateTime endDateTime = LocalDateTime.of(endDate, endTime);
             if (AppointmentData.checkForOverlappingAppointments(startDateTime, endDateTime, customerId)) {
-                showAlert("Validation Error", "Customer already has an overlapping appointment.");
+                showAlert("Validation Error", "Customer already has an overlapping mainpage.");
                 return;
             }
 
-            // Insert the appointment into the database
+            // Insert the mainpage into the database
             AppointmentData.insertAppointment(title, description, location, type, startDateTime, endDateTime, customerId, userId, contactId);
             showAlert("Success", "Appointment successfully added!");
             navigateToAppointmentView(actionEvent);
 
         } catch (SQLException e) {
             e.printStackTrace();
-            showAlert("Database Error", "An error occurred while saving the appointment.");
+            showAlert("Database Error", "An error occurred while saving the mainpage.");
         } catch (NumberFormatException e) {
             // Catch parsing errors if any of the IDs cannot be parsed
             showAlert("Validation Error", "Invalid input in one or more fields.");
