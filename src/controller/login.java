@@ -9,7 +9,6 @@ import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
-import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
@@ -22,7 +21,6 @@ import java.net.URL;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.TimeZone;
-import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -139,7 +137,7 @@ public class login implements Initializable {
             // Proceed to open the mainpage screen
             try {
                 // Load the mainpage.fxml scene
-                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/appointment.fxml"));
+                FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
                 Parent appointmentRoot = loader.load();
 
                 // Get the current stage (window)

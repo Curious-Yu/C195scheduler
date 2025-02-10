@@ -195,7 +195,7 @@ public class modifyAppointment implements Initializable {
 
     private void navigateToAppointmentView(ActionEvent actionEvent) {
         try {
-            Parent root = FXMLLoader.load(getClass().getResource("/view/appointment.fxml"));
+            Parent root = FXMLLoader.load(getClass().getResource("/view/mainpage.fxml"));
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
