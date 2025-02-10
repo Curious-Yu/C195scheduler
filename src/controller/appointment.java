@@ -1,6 +1,7 @@
 package controller;
 
 import helper.AppointmentData;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -15,7 +16,9 @@ import model.Appointments;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.Optional;
 
 public class appointment {
@@ -79,37 +82,64 @@ public class appointment {
 
         // Load all appointments on startup
         try {
-            appointmentTable.setItems(AppointmentData.selectAllAppointments());
+            ObservableList<Appointments> appointments = AppointmentData.selectAllAppointments();
+            appointmentTable.setItems(appointments);
+            checkUpcomingAppointments(appointments);
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to load appointments.");
         }
+
+        startsAtColumn.setCellValueFactory(cellData -> {
+            LocalDateTime start = cellData.getValue().getLocalStart();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return new SimpleStringProperty(start != null ? start.format(formatter) : "");
+        });
+
+        endsAtColumn.setCellValueFactory(cellData -> {
+            LocalDateTime end = cellData.getValue().getLocalEnd();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return new SimpleStringProperty(end != null ? end.format(formatter) : "");
+        });
+
     }
 
+    private void checkUpcomingAppointments(ObservableList<Appointments> appointments) {
+        LocalDateTime now = LocalDateTime.now();
+        for (Appointments appointment : appointments) {
+            LocalDateTime appointmentStartTime = appointment.getLocalStart();
+            long minutesUntilAppointment = ChronoUnit.MINUTES.between(now, appointmentStartTime);
+
+            if (minutesUntilAppointment > 0 && minutesUntilAppointment <= 15) {
+                // Alert for an upcoming appointment within 15 minutes
+                String message = String.format("You have an upcoming appointment!\n" +
+                                "Appointment ID: %d\nDate: %s\nTime: %s",
+                        appointment.getAppointmentId(),
+                        appointmentStartTime.toLocalDate().toString(),
+                        appointmentStartTime.toLocalTime().toString());
+                showAlert("Upcoming Appointment", message);
+                return; // Show alert only for the first upcoming appointment
+            }
+        }
+
+        // If no appointments within 15 minutes, show a custom message
+        showAlert("No Upcoming Appointments", "There are no appointments within 15 minutes of your login.");
+    }
+
+    // Action Methods
     public void addAppointmentActionButton(ActionEvent actionEvent) {
-        // Code for adding a new appointment
         try {
-
-            // Load the addAppointment.fxml file
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/addAppointment.fxml"));
-
             if (loader.getLocation() == null) {
                 showAlert("Error", "addAppointment.fxml not found. Please check the file path.");
                 return;
             }
-
             Parent root = loader.load();
-
-            // Get the current stage
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
-
-            // Create a new scene and set it
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
-
             System.out.println("Successfully opened addAppointment.fxml");
-
         } catch (IOException e) {
             e.printStackTrace();
             showAlert("Error", "Unable to open the Add Appointment window.");
@@ -117,35 +147,26 @@ public class appointment {
     }
 
     public void modifyAppointmentActionButton(ActionEvent actionEvent) {
-        // Get the selected appointment
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
-
-        // Check if an appointment is selected
         if (selectedAppointment == null) {
             showAlert("No Selection", "Please select an appointment to modify.");
             return;
         }
 
         try {
-            // Load the modifyAppointment.fxml file
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyAppointment.fxml"));
             if (loader.getLocation() == null) {
                 showAlert("Error", "modifyAppointment.fxml not found. Please check the file path.");
                 return;
             }
-
             Parent root = loader.load();
-
-            // Get the controller of the modifyAppointment scene
             modifyAppointment controller = loader.getController();
-            controller.setAppointmentData(selectedAppointment); // Pass the selected appointment data
+            controller.setAppointmentData(selectedAppointment);
 
-            // Get the current stage and set the new scene
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             Scene scene = new Scene(root);
             stage.setScene(scene);
             stage.show();
-
             System.out.println("Successfully opened modifyAppointment.fxml with selected appointment data.");
         } catch (IOException e) {
             e.printStackTrace();
@@ -155,42 +176,28 @@ public class appointment {
 
     public void deleteAppointmentActionButton(ActionEvent actionEvent) {
         try {
-            // Get the selected appointment
             Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
-
-            // Check if an appointment is selected
             if (selectedAppointment == null) {
                 showAlert("No Selection", "Please select an appointment to delete.");
                 return;
             }
-
             int appointmentId = selectedAppointment.getAppointmentId();
             String appointmentType = selectedAppointment.getType();
             String appointmentDate = selectedAppointment.getLocalStart().toLocalDate().toString();
             String appointmentTime = selectedAppointment.getLocalStart().toLocalTime().toString();
 
-            // Confirmation message with detailed appointment info
             String confirmationMessage = String.format(
                     "Are you sure you want to delete Appointment ID: %d?\nDate: %s\nTime: %s\nType: %s",
                     appointmentId, appointmentDate, appointmentTime, appointmentType
             );
-
-            // Show confirmation dialog
             Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
             confirmDialog.setTitle("Confirm Deletion");
             confirmDialog.setHeaderText(null);
             confirmDialog.setContentText(confirmationMessage);
-
             Optional<ButtonType> result = confirmDialog.showAndWait();
-
             if (result.isPresent() && result.get() == ButtonType.OK) {
-                // Perform the deletion
                 AppointmentData.deleteAppointment(appointmentId);
-
-                // Refresh the TableView with updated data
                 appointmentTable.setItems(AppointmentData.selectAllAppointments());
-
-                // Show confirmation message
                 Alert infoAlert = new Alert(Alert.AlertType.INFORMATION);
                 infoAlert.setTitle("Deletion Successful");
                 infoAlert.setHeaderText(null);
@@ -200,7 +207,6 @@ public class appointment {
                 );
                 infoAlert.showAndWait();
             }
-
         } catch (SQLException e) {
             e.printStackTrace();
             showAlert("Error", "An error occurred while deleting the appointment.");
@@ -246,14 +252,12 @@ public class appointment {
     }
 
     public void exitActionButton(ActionEvent actionEvent) {
-        // Show confirmation dialog before exiting
         Alert confirmDialog = new Alert(Alert.AlertType.CONFIRMATION);
         confirmDialog.setTitle("Exit Confirmation");
         confirmDialog.setHeaderText(null);
         confirmDialog.setContentText("Are you sure you want to exit?");
         Optional<ButtonType> result = confirmDialog.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // Get the current stage and close it
             Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
             stage.close();
         }
@@ -261,7 +265,6 @@ public class appointment {
 
     private void updateAppointmentTable(ObservableList<Appointments> appointments) {
         appointmentTable.setItems(appointments);
-        // Set the cell value factories for the table columns
         appointmentIDColumn.setCellValueFactory(cellData -> cellData.getValue().appointmentIdProperty().asObject());
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
@@ -275,7 +278,7 @@ public class appointment {
     }
 
     private void showAlert(String title, String message) {
-        Alert alert = new Alert(Alert.AlertType.ERROR);
+        Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle(title);
         alert.setHeaderText(null);
         alert.setContentText(message);
