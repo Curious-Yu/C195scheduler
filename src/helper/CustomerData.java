@@ -69,4 +69,47 @@ public class CustomerData {
         }
         return null;
     }
+
+    public static void addCustomer(String customerName, String address, String postalCode, String phoneNumber, int divisionId) {
+        String sql = "INSERT INTO customers (Customer_Name, Address, Postal_Code, Phone, Division_ID) VALUES (?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
+            // Set the parameters for the SQL query
+            statement.setString(1, customerName);
+            statement.setString(2, address);
+            statement.setString(3, postalCode);
+            statement.setString(4, phoneNumber);
+            statement.setInt(5, divisionId);
+
+            // Execute the insert operation
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+            // Handle the error (e.g., log it or throw a custom exception)
+        }
+    }
+
+    public static void saveCustomer(String customerName, String address, String postalCode, String phoneNumber, int divisionId) {
+        String sql = "INSERT INTO customers (Customer_Name, Address, Postal_Code, Phone, Division_ID) VALUES (?, ?, ?, ?, ?)";
+
+        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
+            // Set the parameters for the SQL query
+            statement.setString(1, customerName);
+            statement.setString(2, address);
+            statement.setString(3, postalCode);
+            statement.setString(4, phoneNumber);
+            statement.setInt(5, divisionId);
+
+            // Execute the insert operation
+            statement.executeUpdate();
+
+            // If needed, log success or take further actions
+            System.out.println("Customer saved successfully!");
+
+        } catch (SQLException e) {
+            // Handle SQL exception
+            e.printStackTrace();
+            // Show an error alert or log it as necessary
+        }
+    }
 }

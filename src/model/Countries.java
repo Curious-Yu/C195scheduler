@@ -33,4 +33,13 @@ public class Countries {
     public String toString() {
         return "Country [Country_ID=" + countryId + ", Country=" + country + "]";
     }
+
+    /**
+     * Returns the name of the country.
+     *
+     * @return The name of the country.
+     */
+    public String getCountryName() {
+        return this.country;  // Returns the name of the country
+    }
 }

@@ -12,7 +12,6 @@ import java.util.List;
  * It provides static methods to retrieve first-level division details from the database.
  */
 public class FirstLevelDivisionData {
-
     /**
      * Retrieves a list of all first-level divisions from the first_level_division table in the database.
      *
@@ -25,7 +24,6 @@ public class FirstLevelDivisionData {
         PreparedStatement statement = JDBC.connection.prepareStatement(sql);
         ResultSet result = statement.executeQuery();
         while (result.next()) {
-            // Create a new FirstLevelDivisions object using the result set
             FirstLevelDivisions division = new FirstLevelDivisions(
                     result.getInt("Division_ID"),
                     result.getString("Division"),
@@ -49,14 +47,13 @@ public class FirstLevelDivisionData {
         statement.setInt(1, divisionId);  // Set the divisionId parameter
         ResultSet result = statement.executeQuery();
         if (result.next()) {
-            // Return a FirstLevelDivisions object with the data from the result set
             return new FirstLevelDivisions(
                     result.getInt("Division_ID"),
                     result.getString("Division"),
                     result.getInt("Country_ID")
             );
         }
-        return null;  // If no division was found, return null
+        return null;
     }
 
     /**
@@ -73,7 +70,6 @@ public class FirstLevelDivisionData {
         statement.setInt(1, countryId);  // Set the countryId parameter
         ResultSet result = statement.executeQuery();
         while (result.next()) {
-            // Create and add a new FirstLevelDivisions object for each row in the result set
             FirstLevelDivisions division = new FirstLevelDivisions(
                     result.getInt("Division_ID"),
                     result.getString("Division"),
@@ -82,5 +78,50 @@ public class FirstLevelDivisionData {
             divisionsList.add(division);
         }
         return divisionsList;
+    }
+
+    /**
+     * Retrieves a list of division names (as Strings) by country ID.
+     *
+     * @param countryId The ID of the country.
+     * @return A List of Strings representing division names belonging to the given country.
+     * @throws SQLException If there is an issue executing the SQL query.
+     */
+    public static List<String> getDivisionsByCountry(int countryId) {
+        List<String> divisionsList = new ArrayList<>();
+        String sql = "SELECT Division FROM first_level_divisions WHERE Country_ID = ?";
+        try {
+            PreparedStatement statement = JDBC.connection.prepareStatement(sql);
+            statement.setInt(1, countryId);  // Set the countryId parameter
+            ResultSet result = statement.executeQuery();
+            while (result.next()) {
+                divisionsList.add(result.getString("Division"));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return divisionsList;
+    }
+
+    /**
+     * Retrieves the Division_ID by the division name.
+     *
+     * @param division The name of the division.
+     * @return The Division_ID of the division, or -1 if no such division exists.
+     * @throws SQLException If there is an issue executing the SQL query.
+     */
+    public static int getDivisionIdByName(String division) {
+        String sql = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
+        try {
+            PreparedStatement statement = JDBC.connection.prepareStatement(sql);
+            statement.setString(1, division);  // Set the division name parameter
+            ResultSet result = statement.executeQuery();
+            if (result.next()) {
+                return result.getInt("Division_ID");  // Return the Division_ID if found
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();  // Print the stack trace for debugging
+        }
+        return -1;  // Return -1 if the division name is not found
     }
 }

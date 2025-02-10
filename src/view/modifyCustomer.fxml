@@ -1,14 +1,144 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import java.lang.*?>
-<?import java.util.*?>
-<?import javafx.scene.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
-<AnchorPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="view.ModifyCustomer"
-            prefHeight="400.0" prefWidth="600.0">
-
+<AnchorPane prefHeight="618.0" prefWidth="600.0" style="-fx-background-color: darkseagreen;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.modifyCustomer">
+    <children>
+        <Label layoutX="208.0" layoutY="23.0" text="Modify Customer">
+            <font>
+                <Font size="24.0" />
+            </font>
+        </Label>
+        <VBox alignment="TOP_RIGHT" layoutX="14.0" layoutY="64.0" prefHeight="444.0" prefWidth="155.0">
+            <children>
+                <Label text="Customer ID :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" top="20.0" />
+                    </VBox.margin></Label>
+                <Label text="First Name :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin></Label>
+                <Label layoutX="26.0" layoutY="77.0" text="Last Name :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin>
+                </Label>
+                <Label text="Address :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin></Label>
+                <Label text="Postal Code :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin></Label>
+                <Label text="Phone Number :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin></Label>
+                <Label text="Country :">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="20.0" />
+                    </VBox.margin></Label>
+                <Label text="State / Province :">
+                    <font>
+                        <Font size="18.0" />
+                    </font></Label>
+            </children>
+        </VBox>
+        <VBox layoutX="186.0" layoutY="64.0" prefHeight="444.0" prefWidth="400.0">
+            <children>
+                <TextField fx:id="customerID" disable="true">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="6.0" top="13.0" />
+                    </VBox.margin>
+                </TextField>
+                <TextField fx:id="customerFirstName">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="8.0" top="2.0" />
+                    </VBox.margin>
+                </TextField>
+                <TextField fx:id="customerLastName" layoutX="10.0" layoutY="70.0">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="8.0" />
+                    </VBox.margin>
+                </TextField>
+                <TextField fx:id="customerAddress">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="8.0" />
+                    </VBox.margin>
+                </TextField>
+                <TextField fx:id="customerPostalCode">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="8.0" />
+                    </VBox.margin>
+                </TextField>
+                <TextField fx:id="customerPhoneNumber">
+                    <font>
+                        <Font size="18.0" />
+                    </font>
+                    <VBox.margin>
+                        <Insets bottom="18.0" />
+                    </VBox.margin>
+                </TextField>
+                <ComboBox fx:id="customerCountry" onAction="#customerCountryDropdown" prefWidth="150.0">
+                    <VBox.margin>
+                        <Insets bottom="22.0" />
+                    </VBox.margin></ComboBox>
+                <ComboBox fx:id="customerDivision" onAction="#customerDivisionDropdown" prefWidth="150.0" />
+            </children></VBox>
+        <Button fx:id="modifyCustomerSave" layoutX="36.0" layoutY="536.0" mnemonicParsing="false" onAction="#modifyCustomerSaveButton" prefWidth="125.0" text="Save">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Button>
+        <Button fx:id="modifyCustomerCancel" layoutX="444.0" layoutY="536.0" mnemonicParsing="false" onAction="#modifyCustomerCancelButton" prefWidth="125.0" text="Cancel">
+            <font>
+                <Font size="18.0" />
+            </font>
+        </Button>
+    </children>
 </AnchorPane>

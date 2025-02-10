@@ -247,7 +247,7 @@ public class mainpage {
     public void modifyAppointmentActionButton(ActionEvent actionEvent) {
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
         if (selectedAppointment == null) {
-            showAlert("No Selection", "Please select an mainpage to modify.");
+            showAlert("No Selection", "Please select an appointment to modify.");
             return;
         }
 
@@ -276,7 +276,7 @@ public class mainpage {
         try {
             Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
             if (selectedAppointment == null) {
-                showAlert("No Selection", "Please select an mainpage to delete.");
+                showAlert("No Selection", "Please select an appointment to delete.");
                 return;
             }
             int appointmentId = selectedAppointment.getAppointmentId();
@@ -380,10 +380,65 @@ public class mainpage {
         alert.showAndWait();
     }
 
+    /**
+     * Navigates to the Add Customer view.
+     * @param actionEvent The event triggered by clicking the Add Customer button.
+     */
     public void addCustomerActionButton(ActionEvent actionEvent) {
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/addCustomer.fxml"));
+            if (loader.getLocation() == null) {
+                showAlert("Error", "addCustomer.fxml not found. Please check the file path.");
+                return;
+            }
+            Parent root = loader.load();
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+            System.out.println("Successfully opened addCustomer.fxml");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Unable to open the Add Customer window.");
+        }
     }
 
+    /**
+     * Navigates to the Modify Customer view and preloads customer data.
+     * @param actionEvent The event triggered by clicking the Modify Customer button.
+     */
     public void modifyCustomerActionButton(ActionEvent actionEvent) {
+        Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
+
+        if (selectedCustomer == null) {
+            showAlert("No Selection", "Please select a customer to modify.");
+            return;
+        }
+
+        try {
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyCustomer.fxml"));
+            if (loader.getLocation() == null) {
+                showAlert("Error", "modifyCustomer.fxml not found. Please check the file path.");
+                return;
+            }
+
+            Parent root = loader.load();
+
+            // Get the controller for the modify customer form
+            modifyCustomer controller = loader.getController();
+            controller.setCustomerData(selectedCustomer);
+
+            // Load the new scene
+            Stage stage = (Stage) ((Node) actionEvent.getSource()).getScene().getWindow();
+            Scene scene = new Scene(root);
+            stage.setScene(scene);
+            stage.show();
+
+            System.out.println("Successfully opened modifyCustomer.fxml with selected customer data.");
+        } catch (IOException e) {
+            e.printStackTrace();
+            showAlert("Error", "Unable to open the Modify Customer window.");
+        }
     }
 
     public void deleteCustomerActionButton(ActionEvent actionEvent) {
