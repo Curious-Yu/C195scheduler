@@ -154,7 +154,6 @@ public class login implements Initializable {
                 String errorAlertTitle = bundle.getString("ErrorAlertTitle");
                 String errorAlertMessage = bundle.getString("ErrorAlertMessage");
             }
-
             // Print user ID for debug purposes
         } else {
             // Failed login

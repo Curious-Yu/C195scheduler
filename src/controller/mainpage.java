@@ -19,13 +19,16 @@ import model.Appointments;
 import model.Countries;
 import model.Customers;
 import model.FirstLevelDivisions;
-
 import java.io.IOException;
 import java.sql.SQLException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.util.Optional;
+import javafx.scene.control.TextField;
+import java.time.*;
+import java.util.Locale;
+import java.util.TimeZone;
 
 public class mainpage {
 
@@ -90,7 +93,8 @@ public class mainpage {
     public Button addCustomerButton;
     public Button modifyCustomerButton;
     public Button deleteCustomerButton;
-
+    @FXML
+    public TextField currentTimeZone;
 
 
     @FXML
@@ -106,6 +110,7 @@ public class mainpage {
         customerIdColumn.setCellValueFactory(new PropertyValueFactory<>("customerId"));
         userIdColumn.setCellValueFactory(new PropertyValueFactory<>("userId"));
         contactIdColumn.setCellValueFactory(new PropertyValueFactory<>("contactId"));
+        displayCurrentTimeZone();
 
         // Load all appointments on startup
         try {
@@ -188,7 +193,7 @@ public class mainpage {
             e.printStackTrace();
             showAlert("Error", "Unable to load customer data.");
         }
-
+        /**
         startsAtColumn.setCellValueFactory(cellData -> {
             LocalDateTime start = cellData.getValue().getLocalStart();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
@@ -199,9 +204,32 @@ public class mainpage {
             LocalDateTime end = cellData.getValue().getLocalEnd();
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
             return new SimpleStringProperty(end != null ? end.format(formatter) : "");
+        }); **/
+        // Initialize the table columns
+        startsAtColumn.setCellValueFactory(cellData -> {
+            // Convert LocalDateTime to String with formatting
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return new SimpleStringProperty(cellData.getValue().getLocalStart().format(formatter));
         });
-    }
 
+        endsAtColumn.setCellValueFactory(cellData -> {
+            // Convert LocalDateTime to String with formatting
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+            return new SimpleStringProperty(cellData.getValue().getLocalEnd().format(formatter));
+        });
+        loadAppointments();
+    }
+    private void loadAppointments() {
+        try {
+            // Fetch all appointments (already adjusted for local time in AppointmentData.java)
+            ObservableList<Appointments> appointments = AppointmentData.selectAllAppointments();
+
+            // Set the data to the table view
+            appointmentTable.setItems(appointments);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     private void checkUpcomingAppointments(ObservableList<Appointments> appointments) {
         LocalDateTime now = LocalDateTime.now();
         for (Appointments appointment : appointments) {
@@ -442,5 +470,37 @@ public class mainpage {
     }
 
     public void deleteCustomerActionButton(ActionEvent actionEvent) {
+    }
+
+    private void displayCurrentTimeZone() {
+        // Get the system's time zone
+        ZoneId zoneId = ZoneId.systemDefault();
+        ZonedDateTime localDateTime = ZonedDateTime.now(zoneId);
+        ZonedDateTime utcDateTime = localDateTime.withZoneSameInstant(ZoneId.of("UTC"));
+
+        // Extract city name (last part of the time zone ID)
+        String timeZoneId = zoneId.getId(); // e.g., "America/New_York"
+        String[] parts = timeZoneId.split("/");
+        String city = (parts.length > 1) ? parts[1].replace("_", " ") : timeZoneId; // Handle missing city case
+
+        // Get the country from the time zone
+        String country = getCountryFromTimeZone(zoneId);
+
+        // Format time
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm:ss");
+        String localTime = localDateTime.format(formatter);
+        String utcTime = utcDateTime.format(formatter);
+
+        // Set the text field with city, country, and time details
+        String displayText = String.format("%s, %s | Local: %s | UTC: %s", city, country, localTime, utcTime);
+        currentTimeZone.setText(displayText);
+    }
+
+    private String getCountryFromTimeZone(ZoneId zoneId) {
+        // Get the country based on the time zone
+        String timeZoneId = zoneId.getId();
+        String countryCode = TimeZone.getTimeZone(timeZoneId).getID();
+        Locale locale = new Locale("", countryCode);
+        return locale.getDisplayCountry().isEmpty() ? "Unknown" : locale.getDisplayCountry(); // Ensure a valid country
     }
 }

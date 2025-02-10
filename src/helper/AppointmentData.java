@@ -9,35 +9,40 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.DayOfWeek;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 public abstract class AppointmentData {
     // method for fetching all appointments
     public static ObservableList<Appointments> selectAllAppointments() throws SQLException {
         ObservableList<Appointments> appointmentObservableList = FXCollections.observableArrayList();
-
         if (JDBC.connection == null) {
             JDBC.openConnection();
         }
-
         String sql = "SELECT * FROM client_schedule.appointments";
         PreparedStatement statement = JDBC.connection.prepareStatement(sql);
         ResultSet result = statement.executeQuery();
-
         while (result.next()) {
             int appId = result.getInt("Appointment_ID");
             String title = result.getString("Title");
             String description = result.getString("Description");
             String location = result.getString("Location");
             String type = result.getString("Type");
-            LocalDateTime begin = result.getTimestamp("Start").toLocalDateTime();
-            LocalDateTime end = result.getTimestamp("End").toLocalDateTime();
+
+            // Convert UTC to local time
+            LocalDateTime begin = result.getTimestamp("Start").toLocalDateTime()
+                    .atZone(ZoneId.of("UTC"))
+                    .withZoneSameInstant(ZoneId.systemDefault())
+                    .toLocalDateTime();
+            LocalDateTime end = result.getTimestamp("End").toLocalDateTime()
+                    .atZone(ZoneId.of("UTC"))
+                    .withZoneSameInstant(ZoneId.systemDefault())
+                    .toLocalDateTime();
+
             int custId = result.getInt("Customer_ID");
             int userId = result.getInt("User_ID");
             int contId = result.getInt("Contact_ID");
-
             appointmentObservableList.add(new Appointments(appId, title, description, location, type, begin, end, custId, userId, contId));
         }
-
         return appointmentObservableList;
     }
 
@@ -132,9 +137,16 @@ public abstract class AppointmentData {
             JDBC.openConnection();
         }
 
-        String sql = "INSERT INTO client_schedule.appointments (Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        // Convert local time to UTC before storing
+        startDateTime = startDateTime.atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("UTC"))
+                .toLocalDateTime();
+        endDateTime = endDateTime.atZone(ZoneId.systemDefault())
+                .withZoneSameInstant(ZoneId.of("UTC"))
+                .toLocalDateTime();
 
+        String sql = "INSERT INTO client_schedule.appointments (Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) "
+                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
             statement.setString(1, title);
             statement.setString(2, description);
@@ -145,12 +157,11 @@ public abstract class AppointmentData {
             statement.setInt(7, customerId);
             statement.setInt(8, userId);
             statement.setInt(9, contactId);
-
             int rowsInserted = statement.executeUpdate();
             if (rowsInserted > 0) {
-                System.out.println("Successfully added mainpage.");
+                System.out.println("Successfully added appointment.");
             } else {
-                System.out.println("Failed to add mainpage.");
+                System.out.println("Failed to add appointment.");
             }
         }
     }
