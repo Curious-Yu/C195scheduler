@@ -168,13 +168,30 @@ public class mainpage {
 
     @FXML
     private void modifyCustomerActionButton(ActionEvent event) {
+        // Retrieve the selected customer from the customer table.
+        Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
+
+        // If no customer is selected, show a warning and exit.
+        if (selectedCustomer == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Customer Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a customer to modify.");
+            alert.showAndWait();
+            return;
+        }
+
         try {
             // Load the modifyCustomer.fxml file.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyCustomer.fxml"));
             Parent root = loader.load();
-            // Get the current stage from the event source.
-            Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
-            // Replace the current scene's root with the modify customer view.
+
+            // Get the modifyCustomer controller and pass the selected customer data.
+            modifyCustomer modController = loader.getController();
+            modController.setCustomerData(selectedCustomer);
+
+            // Get the current stage from the event source and replace the scene's root.
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
@@ -188,7 +205,86 @@ public class mainpage {
 
     @FXML
     private void deleteCustomerActionButton(ActionEvent event) {
-        // Logic for deleting a customer.
+        // Retrieve the selected customer from the customer table.
+        Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
+        if (selectedCustomer == null) {
+            Alert alert = new Alert(Alert.AlertType.WARNING);
+            alert.setTitle("No Customer Selected");
+            alert.setHeaderText(null);
+            alert.setContentText("Please select a customer to delete.");
+            alert.showAndWait();
+            return;
+        }
+
+        // Retrieve all appointments.
+        ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
+        StringBuilder appointmentsDetails = new StringBuilder();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        // Build a list of all appointments for the selected customer.
+        for (Appointments appt : allAppointments) {
+            if (appt.getCustomerId() == selectedCustomer.getCustomerId()) {
+                appointmentsDetails.append("Appointment ID: ")
+                        .append(appt.getAppointmentId())
+                        .append(", Type: ")
+                        .append(appt.getType())
+                        .append(", Start: ")
+                        .append(appt.getStartDateTime().format(formatter))
+                        .append(", End: ")
+                        .append(appt.getEndDateTime().format(formatter))
+                        .append("\n");
+            }
+        }
+
+        // Build the customer details string.
+        String customerDetails = "Customer ID: " + selectedCustomer.getCustomerId() + "\n"
+                + "Customer Name: " + selectedCustomer.getCustomerName() + "\n"
+                + "Address: " + selectedCustomer.getAddress() + "\n"
+                + "Postal Code: " + selectedCustomer.getPostalCode() + "\n"
+                + "Phone: " + selectedCustomer.getPhone();
+
+        String confirmationMessage;
+        if (appointmentsDetails.length() > 0) {
+            confirmationMessage = "Deleting this customer will also delete the following appointments:\n\n"
+                    + appointmentsDetails.toString()
+                    + "\nCustomer Details:\n" + customerDetails
+                    + "\n\nDo you want to proceed?";
+        } else {
+            confirmationMessage = "Customer Details:\n" + customerDetails
+                    + "\n\nThere are no appointments for this customer.\nDo you want to proceed with deletion?";
+        }
+
+        // Show a confirmation alert.
+        Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
+        confirmAlert.setTitle("Confirm Delete Customer");
+        confirmAlert.setHeaderText("Delete Customer and Associated Appointments");
+        confirmAlert.setContentText(confirmationMessage);
+        Optional<ButtonType> result = confirmAlert.showAndWait();
+        if (result.isPresent() && result.get() == ButtonType.OK) {
+            // First, delete all appointments for the selected customer.
+            for (Appointments appt : allAppointments) {
+                if (appt.getCustomerId() == selectedCustomer.getCustomerId()) {
+                    AppointmentData.deleteAppointment(appt.getAppointmentId());
+                }
+            }
+            // Now, delete the customer record.
+            CustomerData.deleteCustomer(selectedCustomer.getCustomerId());
+
+            // Refresh the customer table.
+            ObservableList<Customers> updatedCustomers = CustomerData.getAllCustomers();
+            customerTable.setItems(updatedCustomers);
+
+            // Refresh the appointment table.
+            ObservableList<Appointments> updatedAppointments = AppointmentData.getAllAppointments();
+            appointmentTable.setItems(updatedAppointments);
+
+            // Show a success message.
+            Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
+            successAlert.setTitle("Customer Deleted");
+            successAlert.setHeaderText(null);
+            successAlert.setContentText("The customer and all associated appointments have been deleted successfully.");
+            successAlert.showAndWait();
+        }
     }
 
     @FXML
