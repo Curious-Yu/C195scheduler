@@ -4,6 +4,7 @@ import helper.AppointmentData;
 import helper.ContactData;
 import helper.CustomerData;
 import helper.UsersData;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -21,9 +22,7 @@ import model.Users;
 
 import java.io.IOException;
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ResourceBundle;
 
 public class modifyAppointment implements Initializable {
@@ -212,23 +211,66 @@ public class modifyAppointment implements Initializable {
             alert.showAndWait();
             return;
         }
+
         try {
-            // Combine date and time values (using the raw UTC values from the form).
+            // Combine date and time values.
             LocalDate startDate = apptStartDate.getValue();
             LocalTime startTime = apptStartTime.getValue();
             LocalDate endDate = apptEndDate.getValue();
             LocalTime endTime = apptEndTime.getValue();
             LocalDateTime startDateTime = startDate.atTime(startTime);
             LocalDateTime endDateTime = endDate.atTime(endTime);
+
+            // --- BUSINESS HOURS VALIDATION ---
+            // Business hours are defined as 8:00 AM to 10:00 PM Eastern Time (ET).
+            // Convert the entered local times to Eastern Time.
+            ZoneId easternZone = ZoneId.of("America/New_York");
+            ZonedDateTime startEastern = startDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
+            ZonedDateTime endEastern = endDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
+
+            LocalTime businessStart = LocalTime.of(8, 0);  // 8:00 AM ET
+            LocalTime businessEnd = LocalTime.of(22, 0);   // 10:00 PM ET
+
+            if (startEastern.toLocalTime().isBefore(businessStart) || endEastern.toLocalTime().isAfter(businessEnd)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Outside Business Hours");
+                alert.setHeaderText("Appointment time is outside business hours");
+                alert.setContentText("Appointments must be scheduled between 8:00 AM and 10:00 PM Eastern Time.");
+                alert.showAndWait();
+                return;
+            }
+
+            // --- OVERLAPPING APPOINTMENT VALIDATION ---
+            // Check for overlapping appointments for the same customer (exclude the appointment being modified).
+            int customerID = apptCustomerID.getValue().getCustomerId();
+            ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
+            for (Appointments existingAppt : allAppointments) {
+                // Only check appointments for the same customer, excluding the one being modified.
+                if (existingAppt.getCustomerId() == customerID &&
+                        existingAppt.getAppointmentId() != selectedAppointment.getAppointmentId()) {
+                    // Overlap condition: newStart < existingEnd AND newEnd > existingStart.
+                    if (startDateTime.isBefore(existingAppt.getEndDateTime()) &&
+                            endDateTime.isAfter(existingAppt.getStartDateTime())) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Overlapping Appointment");
+                        alert.setHeaderText("Appointment Overlap Detected");
+                        alert.setContentText("The updated appointment overlaps with an existing appointment for the selected customer.");
+                        alert.showAndWait();
+                        return;
+                    }
+                }
+            }
+
             // Retrieve text field values.
             String title = apptTitle.getText();
             String description = apptDescription.getText();
             String location = apptLocation.getText();
             String type = apptType.getText();
+
             // Retrieve selected IDs.
             int contactID = apptContactID.getValue().getContactId();
-            int customerID = apptCustomerID.getValue().getCustomerId();
             int userID = apptUserID.getValue().getUserId();
+
             // Create an updated Appointment object.
             Appointments updatedAppointment = new Appointments(
                     selectedAppointment.getAppointmentId(),
@@ -242,14 +284,17 @@ public class modifyAppointment implements Initializable {
                     userID,
                     contactID
             );
+
             // Update the appointment in the database.
             AppointmentData.updateAppointment(updatedAppointment);
+
             // Show success message.
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Appointment Updated");
             successAlert.setHeaderText(null);
             successAlert.setContentText("The appointment was successfully updated.");
             successAlert.showAndWait();
+
             // Return to the main page in the same window.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();

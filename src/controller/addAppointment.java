@@ -1,5 +1,6 @@
 package controller;
 
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -26,9 +27,7 @@ import helper.CustomerData;
 import helper.UsersData;
 
 import java.net.URL;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.ResourceBundle;
 
 public class addAppointment implements Initializable {
@@ -190,15 +189,52 @@ public class addAppointment implements Initializable {
             LocalDateTime startDateTime = startDate.atTime(startTime);
             LocalDateTime endDateTime = endDate.atTime(endTime);
 
+            // --- BUSINESS HOURS VALIDATION ---
+            // Business hours: 8:00 AM to 10:00 PM Eastern Time (ET)
+            ZoneId easternZone = ZoneId.of("America/New_York");
+            // Convert the entered local times to Eastern Time.
+            ZonedDateTime startEastern = startDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
+            ZonedDateTime endEastern = endDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
+
+            LocalTime businessStart = LocalTime.of(8, 0);  // 8:00 AM ET
+            LocalTime businessEnd = LocalTime.of(22, 0);   // 10:00 PM ET
+
+            // Check that the start time is not before business start and end time is not after business end.
+            if (startEastern.toLocalTime().isBefore(businessStart) || endEastern.toLocalTime().isAfter(businessEnd)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Outside Business Hours");
+                alert.setHeaderText("Appointment time is outside business hours");
+                alert.setContentText("Appointments must be scheduled between 8:00 AM and 10:00 PM Eastern Time.");
+                alert.showAndWait();
+                return;
+            }
+
+            // --- OVERLAPPING APPOINTMENT VALIDATION ---
+            // Check if the new appointment overlaps with any existing appointment for the same customer.
+            int customerID = apptCustomerID.getValue().getCustomerId();
+            ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
+            for (Appointments existingAppt : allAppointments) {
+                // Only check appointments for the same customer.
+                if (existingAppt.getCustomerId() == customerID) {
+                    // Overlap condition: newStart < existingEnd AND newEnd > existingStart.
+                    if (startDateTime.isBefore(existingAppt.getEndDateTime()) &&
+                            endDateTime.isAfter(existingAppt.getStartDateTime())) {
+                        Alert alert = new Alert(Alert.AlertType.ERROR);
+                        alert.setTitle("Overlapping Appointment");
+                        alert.setHeaderText("Appointment Overlap Detected");
+                        alert.setContentText("The new appointment overlaps with an existing appointment for the selected customer.");
+                        alert.showAndWait();
+                        return;
+                    }
+                }
+            }
+
             // Retrieve text values for Title, Description, Location, and Type.
             String title = apptTitle.getText();
             String description = apptDescription.getText();
             String location = apptLocation.getText();
             String type = apptType.getText();
-
-            // Retrieve the selected IDs from the ComboBoxes.
             int contactID = apptContactID.getValue().getContactId();
-            int customerID = apptCustomerID.getValue().getCustomerId();
             int userID = apptUserID.getValue().getUserId();
 
             // Create a new Appointment object.
@@ -208,8 +244,8 @@ public class addAppointment implements Initializable {
                     description,   // Description
                     location,      // Location
                     type,          // Type
-                    startDateTime, // Start (combination of apptStartDate and apptStartTime)
-                    endDateTime,   // End (combination of apptEndDate and apptEndTime)
+                    startDateTime, // Start (as entered)
+                    endDateTime,   // End (as entered)
                     customerID,    // Customer_ID
                     userID,        // User_ID
                     contactID      // Contact_ID
@@ -225,16 +261,11 @@ public class addAppointment implements Initializable {
             successAlert.setContentText("The appointment was successfully added.");
             successAlert.showAndWait();
 
-            // Instead of closing the window, load mainpage.fxml and set it as the root of the current scene.
+            // Return to the main page in the same window.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
-            // Option 1: Replace the root of the existing scene.
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(mainPageRoot);
-            // Option 2: Alternatively, you could set a new scene on the same stage:
-            // stage.setScene(new Scene(mainPageRoot));
-            // stage.show();
-
         } catch (Exception e) {
             e.printStackTrace();
             Alert errorAlert = new Alert(Alert.AlertType.ERROR);

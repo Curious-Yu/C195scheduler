@@ -1,5 +1,7 @@
 package controller;
 
+import helper.CustomerData;
+import javafx.collections.FXCollections;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -12,22 +14,26 @@ import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import model.Appointments;
+import model.Countries;
+import helper.CountryData;
 import model.Customers;
 import helper.AppointmentData;
 import helper.JDBC;
+import model.FirstLevelDivisions;
+import helper.FirstLevelDivisionData;
+
 import java.io.IOException;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class mainpage {
-
     // TableView for appointments and customers
     @FXML private TableView<Appointments> appointmentTable;
     @FXML private TableView<Customers> customerTable;
-
     // Table Columns for Appointments
     @FXML private TableColumn<Appointments, String> appointmentIDColumn;
     @FXML private TableColumn<Appointments, String> titleColumn;
@@ -39,7 +45,6 @@ public class mainpage {
     @FXML private TableColumn<Appointments, String> customerIdColumn;
     @FXML private TableColumn<Appointments, String> userIdColumn;
     @FXML private TableColumn<Appointments, String> contactIdColumn;
-
     // Table Columns for Customers
     @FXML private TableColumn<Customers, String> customerIDColumn;
     @FXML private TableColumn<Customers, String> nameColumn;
@@ -49,7 +54,6 @@ public class mainpage {
     @FXML private TableColumn<Customers, String> postalCodeColumn;
     @FXML private TableColumn<Customers, String> divisionIDColumn;
     @FXML private TableColumn<Customers, String> phoneColumn;
-
     // Buttons
     @FXML private Button addAppointmentButton;
     @FXML private Button modifyAppointmentButton;
@@ -59,13 +63,11 @@ public class mainpage {
     @FXML private Button deleteCustomerButton;
     @FXML private Button exitButton;
     @FXML private Button reportsButton;
-
     // Radio Buttons
     @FXML private RadioButton allTimeRadio;
     @FXML private RadioButton currentMonthRadio;
     @FXML private RadioButton currentWeekRadio;
     @FXML private ToggleGroup appointmentToggle;
-
     // TextField for Time Zone (displaying "UTC")
     @FXML private TextField currentTimeZone;
 
@@ -125,8 +127,8 @@ public class mainpage {
         String end = selectedAppointment.getEndDateTime().format(formatter);
         String confirmationMessage = "Appointment ID: " + selectedAppointment.getAppointmentId() +
                 "\nType: " + selectedAppointment.getType() +
-                "\nStart: " + start +
-                "\nEnd: " + end;
+                "\nStart (UTC): " + start +
+                "\nEnd (UTC): " + end;
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirm Delete");
         confirmAlert.setHeaderText("Delete Appointment");
@@ -146,12 +148,42 @@ public class mainpage {
 
     @FXML
     private void addCustomerActionButton(ActionEvent event) {
-        // Logic for adding a customer.
+        try {
+            // Load the addCustomer.fxml file.
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/addCustomer.fxml"));
+            Parent root = loader.load();
+            // Get the current stage from the event source.
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            // Replace the current scene's root with the add customer view.
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error Loading Add Customer View");
+            alert.setHeaderText("An error occurred");
+            alert.setContentText("Unable to load the add customer view. Please try again.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
     private void modifyCustomerActionButton(ActionEvent event) {
-        // Logic for modifying a customer.
+        try {
+            // Load the modifyCustomer.fxml file.
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyCustomer.fxml"));
+            Parent root = loader.load();
+            // Get the current stage from the event source.
+            Stage stage = (Stage)((Node)event.getSource()).getScene().getWindow();
+            // Replace the current scene's root with the modify customer view.
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error Loading Modify Customer View");
+            alert.setHeaderText("An error occurred");
+            alert.setContentText("Unable to load the modify customer view. Please try again.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
@@ -212,14 +244,14 @@ public class mainpage {
 
     // Initialize method to set up table data, time zone, etc.
     public void initialize() {
-        // Setup appointment table columns.
+        // Setup appointment table columns (existing code)...
         appointmentIDColumn.setCellValueFactory(cellData -> cellData.getValue().appointmentIdProperty().asString());
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
         locationColumn.setCellValueFactory(cellData -> cellData.getValue().locationProperty());
         typeColumn.setCellValueFactory(cellData -> cellData.getValue().typeProperty());
+
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        // Display the UTC times exactly as stored in the database.
         startsAtColumn.setCellValueFactory(cellData ->
                 new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
         endsAtColumn.setCellValueFactory(cellData ->
@@ -227,7 +259,59 @@ public class mainpage {
         customerIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty().asString());
         userIdColumn.setCellValueFactory(cellData -> cellData.getValue().userIdProperty().asString());
         contactIdColumn.setCellValueFactory(cellData -> cellData.getValue().contactIdProperty().asString());
-        // Update the currentTimeZone TextField to display the user's city, region, and current local time.
+
+        // Set up customerTable columns.
+        customerIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
+        nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCustomerName()));
+        addressColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAddress()));
+        postalCodeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPostalCode()));
+        phoneColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
+
+        // For divisionIDColumn, simply display the division ID.
+        divisionIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getDivisionId())));
+
+        // Lookup and display the state (division name) using the customer's division ID.
+        ObservableList<FirstLevelDivisions> divisions = javafx.collections.FXCollections.observableArrayList();
+        try {
+            divisions.addAll(helper.FirstLevelDivisionData.getAllFirstLevelDivisions());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        stateColumn.setCellValueFactory(cellData -> {
+            int divisionId = cellData.getValue().getDivisionId();
+            String stateName = divisions.stream()
+                    .filter(div -> div.getDivisionId() == divisionId)
+                    .map(FirstLevelDivisions::getDivision)
+                    .findFirst()
+                    .orElse("N/A");
+            return new SimpleStringProperty(stateName);
+        });
+
+        // For countryColumn
+        ObservableList<Countries> countries = FXCollections.observableArrayList();
+        try {
+            countries.addAll(helper.CountryData.getAllCountries());
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        countryColumn.setCellValueFactory(cellData -> {
+            int divisionId = cellData.getValue().getDivisionId();
+            String countryName = divisions.stream()
+                    .filter(div -> div.getDivisionId() == divisionId)
+                    .map(div -> {
+                        int countryId = div.getCountryId();
+                        return countries.stream()
+                                .filter(c -> c.getCountryId() == countryId)
+                                .map(Countries::getCountry)
+                                .findFirst()
+                                .orElse("N/A");
+                    })
+                    .findFirst()
+                    .orElse("N/A");
+            return new SimpleStringProperty(countryName);
+        });
+
+        // Update the currentTimeZone TextField.
         ZoneId zone = ZoneId.systemDefault();
         ZonedDateTime now = ZonedDateTime.now(zone);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -241,5 +325,48 @@ public class mainpage {
         // Set the All Time radio button as default and load all appointments.
         allTimeRadio.setSelected(true);
         OnAllTimeRadio(null);
+
+        // Load customers into the customerTable.
+        ObservableList<Customers> customersList = CustomerData.getAllCustomers();
+        customerTable.setItems(customersList);
+
+        // Check for upcoming appointments within 15 minutes.
+        checkUpcomingAppointments();
+    }
+
+    /**
+     * Checks for appointments that start within 15 minutes from now and displays an alert.
+     * If no appointments are upcoming within 15 minutes, displays a custom message.
+     */
+    private void checkUpcomingAppointments() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime threshold = now.plusMinutes(15);
+        ObservableList<Appointments> appointments = AppointmentData.getAllAppointments();
+        StringBuilder alertMsg = new StringBuilder();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+
+        for (Appointments appt : appointments) {
+            // Use local conversion to display times in user's time zone.
+            LocalDateTime apptStart = appt.getLocalStartDateTime();
+            if (apptStart.isAfter(now) && apptStart.isBefore(threshold)) {
+                alertMsg.append("Appointment ID: ").append(appt.getAppointmentId())
+                        .append(", Date & Time: ").append(apptStart.format(formatter))
+                        .append("\n");
+            }
+        }
+
+        if (alertMsg.length() > 0) {
+            Alert upcomingAlert = new Alert(Alert.AlertType.INFORMATION);
+            upcomingAlert.setTitle("Upcoming Appointment(s)");
+            upcomingAlert.setHeaderText("You have an appointment within the next 15 minutes:");
+            upcomingAlert.setContentText(alertMsg.toString());
+            upcomingAlert.showAndWait();
+        } else {
+            Alert noUpcomingAlert = new Alert(Alert.AlertType.INFORMATION);
+            noUpcomingAlert.setTitle("No Upcoming Appointments");
+            noUpcomingAlert.setHeaderText(null);
+            noUpcomingAlert.setContentText("You do not have any appointments scheduled within the next 15 minutes.");
+            noUpcomingAlert.showAndWait();
+        }
     }
 }
