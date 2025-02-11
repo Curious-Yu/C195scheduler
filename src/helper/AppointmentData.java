@@ -4,236 +4,123 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Appointments;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.time.DayOfWeek;
+import java.sql.*;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
+import java.util.Calendar;
+import java.util.TimeZone;
 
 public abstract class AppointmentData {
-    // method for fetching all appointments
-    public static ObservableList<Appointments> selectAllAppointments() throws SQLException {
-        ObservableList<Appointments> appointmentObservableList = FXCollections.observableArrayList();
-        if (JDBC.connection == null) {
-            JDBC.openConnection();
-        }
-        String sql = "SELECT * FROM client_schedule.appointments";
-        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
-        ResultSet result = statement.executeQuery();
-        while (result.next()) {
-            int appId = result.getInt("Appointment_ID");
-            String title = result.getString("Title");
-            String description = result.getString("Description");
-            String location = result.getString("Location");
-            String type = result.getString("Type");
 
-            // Convert UTC to local time
-            LocalDateTime begin = result.getTimestamp("Start").toLocalDateTime()
-                    .atZone(ZoneId.of("UTC"))
-                    .withZoneSameInstant(ZoneId.systemDefault())
-                    .toLocalDateTime();
-            LocalDateTime end = result.getTimestamp("End").toLocalDateTime()
-                    .atZone(ZoneId.of("UTC"))
-                    .withZoneSameInstant(ZoneId.systemDefault())
-                    .toLocalDateTime();
+    /**
+     * Retrieves all appointments from the database.
+     *
+     * @return an ObservableList of Appointments objects.
+     */
+    public static ObservableList<Appointments> getAllAppointments() {
+        ObservableList<Appointments> appointmentList = FXCollections.observableArrayList();
+        try {
+            String sql = "SELECT * FROM appointments";
+            PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+            // Do not pass a Calendar here:
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                int appointmentId = rs.getInt("Appointment_ID");
+                String title = rs.getString("Title");
+                String description = rs.getString("Description");
+                String location = rs.getString("Location");
+                String type = rs.getString("Type");
 
-            int custId = result.getInt("Customer_ID");
-            int userId = result.getInt("User_ID");
-            int contId = result.getInt("Contact_ID");
-            appointmentObservableList.add(new Appointments(appId, title, description, location, type, begin, end, custId, userId, contId));
-        }
-        return appointmentObservableList;
-    }
+                // Retrieve timestamps without a Calendar parameter.
+                Timestamp startTimestamp = rs.getTimestamp("Start");
+                Timestamp endTimestamp = rs.getTimestamp("End");
 
-    // method to fetch appointments for the current month
-    public static ObservableList<Appointments> selectAppointmentsForCurrentMonth() throws SQLException {
-        ObservableList<Appointments> appointmentObservableList = FXCollections.observableArrayList();
+                // Convert SQL Timestamps to LocalDateTime.
+                LocalDateTime startDateTime = startTimestamp.toLocalDateTime();
+                LocalDateTime endDateTime = endTimestamp.toLocalDateTime();
 
-        LocalDateTime now = LocalDateTime.now();
-        int currentYear = now.getYear();
-        int currentMonth = now.getMonthValue();
+                int customerId = rs.getInt("Customer_ID");
+                int userId = rs.getInt("User_ID");
+                int contactId = rs.getInt("Contact_ID");
 
-        String sql = "SELECT * FROM client_schedule.appointments " +
-                "WHERE YEAR(Start) = ? AND MONTH(Start) = ?";
-
-        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
-        statement.setInt(1, currentYear);
-        statement.setInt(2, currentMonth);
-        ResultSet result = statement.executeQuery();
-
-        while (result.next()) {
-            int appId = result.getInt("Appointment_ID");
-            String title = result.getString("Title");
-            String description = result.getString("Description");
-            String location = result.getString("Location");
-            String type = result.getString("Type");
-            LocalDateTime begin = result.getTimestamp("Start").toLocalDateTime();
-            LocalDateTime end = result.getTimestamp("End").toLocalDateTime();
-            int custId = result.getInt("Customer_ID");
-            int userId = result.getInt("User_ID");
-            int contId = result.getInt("Contact_ID");
-
-            appointmentObservableList.add(new Appointments(appId, title, description, location, type, begin, end, custId, userId, contId));
-        }
-
-        return appointmentObservableList;
-    }
-
-    // method to fetch appointments for the current week
-    public static ObservableList<Appointments> selectAppointmentsForCurrentWeek() throws SQLException {
-        ObservableList<Appointments> appointmentObservableList = FXCollections.observableArrayList();
-
-        // Get the current date and calculate the start and end of the current week (Monday-Sunday)
-        LocalDateTime now = LocalDateTime.now();
-
-        // Find the start of the current week (Monday)
-        LocalDateTime startOfWeek = now.with(DayOfWeek.MONDAY).toLocalDate().atStartOfDay();
-
-        // Find the end of the current week (Sunday, 23:59:59)
-        LocalDateTime endOfWeek = startOfWeek.plusDays(6).withHour(23).withMinute(59).withSecond(59);
-
-        // SQL query to fetch appointments within the current week
-        String sql = "SELECT * FROM client_schedule.appointments " +
-                "WHERE Start BETWEEN ? AND ?";
-
-        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
-        statement.setTimestamp(1, java.sql.Timestamp.valueOf(startOfWeek));
-        statement.setTimestamp(2, java.sql.Timestamp.valueOf(endOfWeek));
-        ResultSet result = statement.executeQuery();
-
-        while (result.next()) {
-            int appId = result.getInt("Appointment_ID");
-            String title = result.getString("Title");
-            String description = result.getString("Description");
-            String location = result.getString("Location");
-            String type = result.getString("Type");
-            LocalDateTime begin = result.getTimestamp("Start").toLocalDateTime();
-            LocalDateTime end = result.getTimestamp("End").toLocalDateTime();
-            int custId = result.getInt("Customer_ID");
-            int userId = result.getInt("User_ID");
-            int contId = result.getInt("Contact_ID");
-
-            appointmentObservableList.add(new Appointments(appId, title, description, location, type, begin, end, custId, userId, contId));
-        }
-
-        return appointmentObservableList;
-    }
-
-    // Method to delete an mainpage by Appointment_ID
-    public static void deleteAppointment(int appointmentId) throws SQLException {
-        String sql = "DELETE FROM client_schedule.appointments WHERE Appointment_ID = ?";
-
-        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
-        statement.setInt(1, appointmentId);
-        statement.executeUpdate();
-    }
-
-    // Method to insert a new mainpage into the database
-    public static void insertAppointment(String title, String description, String location, String type,
-                                         LocalDateTime startDateTime, LocalDateTime endDateTime,
-                                         Integer customerId, Integer userId, Integer contactId) throws SQLException {
-        if (JDBC.connection == null) {
-            JDBC.openConnection();
-        }
-
-        // Convert local time to UTC before storing
-        startDateTime = startDateTime.atZone(ZoneId.systemDefault())
-                .withZoneSameInstant(ZoneId.of("UTC"))
-                .toLocalDateTime();
-        endDateTime = endDateTime.atZone(ZoneId.systemDefault())
-                .withZoneSameInstant(ZoneId.of("UTC"))
-                .toLocalDateTime();
-
-        String sql = "INSERT INTO client_schedule.appointments (Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) "
-                + "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
-            statement.setString(1, title);
-            statement.setString(2, description);
-            statement.setString(3, location);
-            statement.setString(4, type);
-            statement.setTimestamp(5, java.sql.Timestamp.valueOf(startDateTime));
-            statement.setTimestamp(6, java.sql.Timestamp.valueOf(endDateTime));
-            statement.setInt(7, customerId);
-            statement.setInt(8, userId);
-            statement.setInt(9, contactId);
-            int rowsInserted = statement.executeUpdate();
-            if (rowsInserted > 0) {
-                System.out.println("Successfully added appointment.");
-            } else {
-                System.out.println("Failed to add appointment.");
-            }
-        }
-    }
-
-    // Method to update an existing mainpage
-    public static void updateAppointment(int appointmentId, String title, String description, String location, String type,
-                                         LocalDateTime startDateTime, LocalDateTime endDateTime,
-                                         Integer customerId, Integer userId, Integer contactId) throws SQLException {
-        if (JDBC.connection == null) {
-            JDBC.openConnection();
-        }
-
-        String sql = "UPDATE client_schedule.appointments " +
-                "SET Title = ?, Description = ?, Location = ?, Type = ?, Start = ?, End = ?, " +
-                "Customer_ID = ?, User_ID = ?, Contact_ID = ? WHERE Appointment_ID = ?";
-
-        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
-            statement.setString(1, title);
-            statement.setString(2, description);
-            statement.setString(3, location);
-            statement.setString(4, type);
-            statement.setTimestamp(5, java.sql.Timestamp.valueOf(startDateTime));
-            statement.setTimestamp(6, java.sql.Timestamp.valueOf(endDateTime));
-            statement.setInt(7, customerId);
-            statement.setInt(8, userId);
-            statement.setInt(9, contactId);
-            statement.setInt(10, appointmentId);
-
-            int rowsUpdated = statement.executeUpdate();
-            if (rowsUpdated > 0) {
-                System.out.println("Successfully updated mainpage ID: " + appointmentId);
-            } else {
-                System.out.println("Failed to update mainpage ID: " + appointmentId);
-            }
-        }
-    }
-
-    public static boolean checkForOverlappingAppointments(LocalDateTime startDateTime, LocalDateTime endDateTime, int customerId) {
-        boolean hasOverlap = false;
-
-        if (JDBC.connection == null) {
-            JDBC.openConnection();
-        }
-
-        // SQL query to check for overlapping appointments
-        String sql = "SELECT * FROM client_schedule.appointments " +
-                "WHERE Customer_ID = ? AND (" +
-                "(Start BETWEEN ? AND ?) OR " +
-                "(End BETWEEN ? AND ?) OR " +
-                "(? BETWEEN Start AND End) OR " +
-                "(? BETWEEN Start AND End))";
-
-        try (PreparedStatement statement = JDBC.connection.prepareStatement(sql)) {
-            // Set parameters: customer ID, start and end times
-            statement.setInt(1, customerId);
-            statement.setTimestamp(2, java.sql.Timestamp.valueOf(startDateTime));
-            statement.setTimestamp(3, java.sql.Timestamp.valueOf(endDateTime));
-            statement.setTimestamp(4, java.sql.Timestamp.valueOf(startDateTime));
-            statement.setTimestamp(5, java.sql.Timestamp.valueOf(endDateTime));
-            statement.setTimestamp(6, java.sql.Timestamp.valueOf(startDateTime));
-            statement.setTimestamp(7, java.sql.Timestamp.valueOf(endDateTime));
-
-            ResultSet result = statement.executeQuery();
-
-            // If the result set has any rows, it means there is an overlapping mainpage
-            if (result.next()) {
-                hasOverlap = true;
+                Appointments appointment = new Appointments(
+                        appointmentId, title, description, location, type,
+                        startDateTime, endDateTime, customerId, userId, contactId
+                );
+                appointmentList.add(appointment);
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        return appointmentList;
+    }
 
-        return hasOverlap;
+    /**
+     * Inserts a new appointment into the database.
+     *
+     * @param appointment the Appointments object containing the data to be stored.
+     */
+    public static void addAppointment(Appointments appointment) {
+        try {
+            String sql = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) " +
+                    "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+            ps.setInt(1, appointment.getAppointmentId());
+            ps.setString(2, appointment.getTitle());
+            ps.setString(3, appointment.getDescription());
+            ps.setString(4, appointment.getLocation());
+            ps.setString(5, appointment.getType());
+            // Since the start and end times are stored in UTC, we assume the values provided in the Appointments
+            // object are in UTC. They are inserted as SQL Timestamp values.
+            ps.setTimestamp(6, Timestamp.valueOf(appointment.getStartDateTime()));
+            ps.setTimestamp(7, Timestamp.valueOf(appointment.getEndDateTime()));
+            ps.setInt(8, appointment.getCustomerId());
+            ps.setInt(9, appointment.getUserId());
+            ps.setInt(10, appointment.getContactId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Updates an existing appointment in the database.
+     *
+     * @param updatedAppointment the appointment with updated values.
+     */
+    public static void updateAppointment(Appointments updatedAppointment) {
+        try {
+            String sql = "UPDATE appointments SET Title = ?, Description = ?, Location = ?, Type = ?, Start = ?, End = ?, Customer_ID = ?, User_ID = ?, Contact_ID = ? " +
+                    "WHERE Appointment_ID = ?";
+            PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+            ps.setString(1, updatedAppointment.getTitle());
+            ps.setString(2, updatedAppointment.getDescription());
+            ps.setString(3, updatedAppointment.getLocation());
+            ps.setString(4, updatedAppointment.getType());
+            ps.setTimestamp(5, Timestamp.valueOf(updatedAppointment.getStartDateTime()));
+            ps.setTimestamp(6, Timestamp.valueOf(updatedAppointment.getEndDateTime()));
+            ps.setInt(7, updatedAppointment.getCustomerId());
+            ps.setInt(8, updatedAppointment.getUserId());
+            ps.setInt(9, updatedAppointment.getContactId());
+            ps.setInt(10, updatedAppointment.getAppointmentId());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * Deletes an appointment from the database.
+     *
+     * @param appointmentId the ID of the appointment to delete.
+     */
+    public static void deleteAppointment(int appointmentId) {
+        try {
+            String sql = "DELETE FROM appointments WHERE Appointment_ID = ?";
+            PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+            ps.setInt(1, appointmentId);
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 }

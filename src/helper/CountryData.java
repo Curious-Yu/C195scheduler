@@ -1,53 +1,41 @@
 package helper;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import model.Countries;
+
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.List;
 
-/**
- * This class serves as a Data Access Object (DAO) for managing country information in a database.
- * It provides static methods to retrieve country details from the database.
- */
-public class CountryData {
+public abstract class CountryData {
 
     /**
-     * Retrieves a list of all countries from the countries table in the database.
+     * Retrieves all countries from the database.
      *
-     * @return A List of Countries objects.
-     * @throws SQLException If there is an issue executing the SQL query.
+     * @return an ObservableList of Countries objects.
      */
-    public static List<Countries> getAllCountries() throws SQLException {
-        List<Countries> countriesList = new ArrayList<>();
-        String sql = "SELECT * FROM countries";  // Simple query to fetch all countries
-        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
-        ResultSet result = statement.executeQuery();
-        while (result.next()) {
-            // Create a new Countries object using the result set
-            Countries country = new Countries(result.getInt("Country_ID"), result.getString("Country"));
-            countriesList.add(country);
-        }
-        return countriesList;
-    }
+    public static ObservableList<Countries> getAllCountries() {
+        ObservableList<Countries> countryList = FXCollections.observableArrayList();
 
-    /**
-     * Retrieves a specific country by its ID.
-     *
-     * @param countryId The ID of the country.
-     * @return A Countries object representing the country with the given ID.
-     * @throws SQLException If there is an issue executing the SQL query.
-     */
-    public static Countries getCountryById(int countryId) throws SQLException {
-        String sql = "SELECT * FROM countries WHERE Country_ID = ?";
-        PreparedStatement statement = JDBC.connection.prepareStatement(sql);
-        statement.setInt(1, countryId);  // Set the countryId parameter
-        ResultSet result = statement.executeQuery();
-        if (result.next()) {
-            // Return a country object with the data from the result set
-            return new Countries(result.getInt("Country_ID"), result.getString("Country"));
+        try {
+            // SQL query to fetch all countries from the "countries" table.
+            String sql = "SELECT * FROM countries";
+            PreparedStatement ps = JDBC.connection.prepareStatement(sql);
+            ResultSet rs = ps.executeQuery();
+
+            // Iterate through the results and create Countries objects.
+            while (rs.next()) {
+                int countryId = rs.getInt("Country_ID");
+                String countryName = rs.getString("Country");
+
+                Countries country = new Countries(countryId, countryName);
+                countryList.add(country);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
-        return null;  // If no country was found, return null
+
+        return countryList;
     }
 }

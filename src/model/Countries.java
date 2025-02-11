@@ -28,18 +28,4 @@ public class Countries {
         this.country = country;
     }
 
-    // Override toString for better output representation
-    @Override
-    public String toString() {
-        return "Country [Country_ID=" + countryId + ", Country=" + country + "]";
-    }
-
-    /**
-     * Returns the name of the country.
-     *
-     * @return The name of the country.
-     */
-    public String getCountryName() {
-        return this.country;  // Returns the name of the country
-    }
 }
