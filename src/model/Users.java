@@ -1,19 +1,18 @@
 package model;
 
 public class Users {
-
     private int userId;
     private String userName;
     private String password;
 
-    // Constructor
+    //------ Constructor ------
     public Users(int userId, String userName, String password) {
         this.userId = userId;
         this.userName = userName;
         this.password = password;
     }
 
-    // Getters and Setters
+    //------ Getters and Setters ------
     public int getUserId() {
         return userId;
     }

@@ -1,19 +1,18 @@
 package model;
 
 public class FirstLevelDivisions {
-
     private int divisionId;
     private String division;
     private int countryId;
 
-    // Constructor
+    //------ Constructor ------
     public FirstLevelDivisions(int divisionId, String division, int countryId) {
         this.divisionId = divisionId;
         this.division = division;
         this.countryId = countryId;
     }
 
-    // Getters and Setters
+    //------ Getters and Setters ------
     public int getDivisionId() {
         return divisionId;
     }

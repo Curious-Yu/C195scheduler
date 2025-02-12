@@ -11,7 +11,7 @@ public class Customers {
     private String phone;
     private int divisionId;
 
-    // Constructor with parameters
+    //------ Parameterized Constructor ------
     public Customers(int customerId, String customerName, String address, String postalCode, String phone, int divisionId) {
         this.customerId = customerId;
         this.customerName = customerName;
@@ -21,7 +21,7 @@ public class Customers {
         this.divisionId = divisionId;
     }
 
-    // Constructor that takes a ResultSet
+    //------ ResultSet Constructor ------
     public Customers(ResultSet result) throws SQLException {
         this.customerId = result.getInt("Customer_ID");
         this.customerName = result.getString("Customer_Name");
@@ -31,7 +31,7 @@ public class Customers {
         this.divisionId = result.getInt("Division_ID");
     }
 
-    // Getters and Setters
+    //------ Getters and Setters ------
     public int getCustomerId() {
         return customerId;
     }

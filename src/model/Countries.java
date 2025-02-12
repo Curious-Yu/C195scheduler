@@ -1,17 +1,16 @@
 package model;
 
 public class Countries {
-
     private int countryId;
     private String country;
 
-    // Constructor
+    //------ Constructor ------
     public Countries(int countryId, String country) {
         this.countryId = countryId;
         this.country = country;
     }
 
-    // Getters and Setters
+    //------ Getters and Setters ------
     public int getCountryId() {
         return countryId;
     }
@@ -27,5 +26,4 @@ public class Countries {
     public void setCountry(String country) {
         this.country = country;
     }
-
 }

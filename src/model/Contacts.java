@@ -1,19 +1,18 @@
 package model;
 
 public class Contacts {
-
     private int contactId;
     private String contactName;
     private String email;
 
-    // Constructor
+    //------ Constructor ------
     public Contacts(int contactId, String contactName, String email) {
         this.contactId = contactId;
         this.contactName = contactName;
         this.email = email;
     }
 
-    // Getters and Setters
+    //------ Getters and Setters ------
     public int getContactId() {
         return contactId;
     }
