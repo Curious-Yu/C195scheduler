@@ -7,9 +7,18 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
 
+/**
+ * Main class for the C195 Scheduler application.
+ * Opens the database connection, launches the JavaFX application, and closes the connection upon exit.
+ */
 public class Main extends Application {
 
-    //------ Start Application ------
+    /**
+     * Starts the JavaFX application by loading the login view.
+     *
+     * @param stage the primary stage for this application
+     * @throws Exception if the FXML resource cannot be loaded
+     */
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/view/login.fxml"));
@@ -18,7 +27,12 @@ public class Main extends Application {
         stage.show();
     }
 
-    //------ Main Method ------
+    /**
+     * The main method which launches the application.
+     * Opens the database connection, launches the JavaFX application, and then closes the connection.
+     *
+     * @param args the command line arguments
+     */
     public static void main(String[] args) {
         JDBC.openConnection();
         System.out.println("Hello C195 Scheduler!");
