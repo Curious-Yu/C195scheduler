@@ -2,6 +2,7 @@ package controller;
 
 import helper.JDBC;
 import helper.UsersData;
+import helper.LoginActivityLogger;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
@@ -78,6 +79,7 @@ public class login implements Initializable {
             alert.setHeaderText(rb.getString("EmptyFieldsMessage"));
             alert.setContentText(rb.getString("EmptyFieldsMessage"));
             alert.showAndWait();
+            LoginActivityLogger.logAttempt(username, false); // Log failure
             return;
         }
 
@@ -89,15 +91,17 @@ public class login implements Initializable {
             alert.setHeaderText(rb.getString("AlertMessage"));
             alert.setContentText(rb.getString("AlertMessage"));
             alert.showAndWait();
+            LoginActivityLogger.logAttempt(username, false); // Log failure
             return;
         }
 
         //------ Successful Login ------
+        LoginActivityLogger.logAttempt(username, true); // Log success
         LoginMessageLabel.setText(String.format(rb.getString("SuccessMessage"), user.getUserName()));
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"), rb);
             Parent root = loader.load();
-            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
