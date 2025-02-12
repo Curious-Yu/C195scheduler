@@ -1,0 +1,31 @@
+Title: C195 Scheduler
+
+Purpose:
+    This application manages business appointments and customer data, tracks user login activity,
+    and generates various reports for scheduling and business analysis.
+
+Author: Wen Yu
+Contact Information: weyu@wgu.edu
+Student Application Version: 1.0
+Date: 02/11/2025
+
+IDE: IntelliJ IDEA 2023.2.2 (Community Edition)
+JDK: Java SE 17.0.1
+JavaFX: JavaFX-SDK-11.0.2
+MySQL Server: 8.0.25
+MySQL Connector: mysql-connector-java-8.0.25
+
+Directions:
+    1. Import the project file into IntelliJ IDEA.
+    2. Set the 'Main' file (located in src/main, for example) as the launch source.
+    3. Import the JavaFX library and the MySQL connector library into your project.
+    4. Ensure your Java version is set to 17.0.1.
+    5. Add the following to your Java VM launch options:
+       --module-path ${PATH_TO_FX} --add-modules javafx.fxml,javafx.controls,javafx.graphics
+    6. Verify that your database "client_schedule" is set up and that the connection settings in helper/JDBC.java are correct.
+    7. Run the main method in main/Main.java to launch the application.
+    8. The login screen will appear; use valid credentials to log in.
+
+Additional Report for part A3f:
+    The application includes an Appointment Location Report that aggregates appointment counts
+    by country and state/province, providing insights into regional appointment trends.
