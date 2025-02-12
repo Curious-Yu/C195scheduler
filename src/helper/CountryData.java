@@ -8,24 +8,18 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 
 public abstract class CountryData {
-    /**
-     * Retrieves all countries from the database.
-     *
-     * @return an ObservableList of Countries objects.
-     */
+
+    //------ Get All Countries ------
     public static ObservableList<Countries> getAllCountries() {
         ObservableList<Countries> countryList = FXCollections.observableArrayList();
         try {
-            // SQL query to fetch all countries from the "countries" table.
             String sql = "SELECT * FROM countries";
             PreparedStatement ps = JDBC.connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
-            // Iterate through the results and create Countries objects.
             while (rs.next()) {
                 int countryId = rs.getInt("Country_ID");
                 String countryName = rs.getString("Country");
-                Countries country = new Countries(countryId, countryName);
-                countryList.add(country);
+                countryList.add(new Countries(countryId, countryName));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -33,12 +27,7 @@ public abstract class CountryData {
         return countryList;
     }
 
-    /**
-     * Retrieves a specific country from the database by its ID.
-     *
-     * @param countryId the ID of the country to retrieve.
-     * @return a Countries object if found, otherwise null.
-     */
+    //------ Get Country by ID ------
     public static Countries getCountryById(int countryId) {
         Countries country = null;
         try {

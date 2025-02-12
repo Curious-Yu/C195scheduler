@@ -3,25 +3,17 @@ package helper;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import model.Appointments;
-
 import java.sql.*;
 import java.time.LocalDateTime;
-import java.util.Calendar;
-import java.util.TimeZone;
 
 public abstract class AppointmentData {
 
-    /**
-     * Retrieves all appointments from the database.
-     *
-     * @return an ObservableList of Appointments objects.
-     */
+    //------ Retrieve All Appointments ------
     public static ObservableList<Appointments> getAllAppointments() {
         ObservableList<Appointments> appointmentList = FXCollections.observableArrayList();
         try {
             String sql = "SELECT * FROM appointments";
             PreparedStatement ps = JDBC.connection.prepareStatement(sql);
-            // Do not pass a Calendar here:
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
                 int appointmentId = rs.getInt("Appointment_ID");
@@ -29,19 +21,13 @@ public abstract class AppointmentData {
                 String description = rs.getString("Description");
                 String location = rs.getString("Location");
                 String type = rs.getString("Type");
-
-                // Retrieve timestamps without a Calendar parameter.
                 Timestamp startTimestamp = rs.getTimestamp("Start");
                 Timestamp endTimestamp = rs.getTimestamp("End");
-
-                // Convert SQL Timestamps to LocalDateTime.
                 LocalDateTime startDateTime = startTimestamp.toLocalDateTime();
                 LocalDateTime endDateTime = endTimestamp.toLocalDateTime();
-
                 int customerId = rs.getInt("Customer_ID");
                 int userId = rs.getInt("User_ID");
                 int contactId = rs.getInt("Contact_ID");
-
                 Appointments appointment = new Appointments(
                         appointmentId, title, description, location, type,
                         startDateTime, endDateTime, customerId, userId, contactId
@@ -54,11 +40,7 @@ public abstract class AppointmentData {
         return appointmentList;
     }
 
-    /**
-     * Inserts a new appointment into the database.
-     *
-     * @param appointment the Appointments object containing the data to be stored.
-     */
+    //------ Add New Appointment ------
     public static void addAppointment(Appointments appointment) {
         try {
             String sql = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) " +
@@ -69,8 +51,6 @@ public abstract class AppointmentData {
             ps.setString(3, appointment.getDescription());
             ps.setString(4, appointment.getLocation());
             ps.setString(5, appointment.getType());
-            // Since the start and end times are stored in UTC, we assume the values provided in the Appointments
-            // object are in UTC. They are inserted as SQL Timestamp values.
             ps.setTimestamp(6, Timestamp.valueOf(appointment.getStartDateTime()));
             ps.setTimestamp(7, Timestamp.valueOf(appointment.getEndDateTime()));
             ps.setInt(8, appointment.getCustomerId());
@@ -82,11 +62,7 @@ public abstract class AppointmentData {
         }
     }
 
-    /**
-     * Updates an existing appointment in the database.
-     *
-     * @param updatedAppointment the appointment with updated values.
-     */
+    //------ Update Appointment ------
     public static void updateAppointment(Appointments updatedAppointment) {
         try {
             String sql = "UPDATE appointments SET Title = ?, Description = ?, Location = ?, Type = ?, Start = ?, End = ?, Customer_ID = ?, User_ID = ?, Contact_ID = ? " +
@@ -108,11 +84,7 @@ public abstract class AppointmentData {
         }
     }
 
-    /**
-     * Deletes an appointment from the database.
-     *
-     * @param appointmentId the ID of the appointment to delete.
-     */
+    //------ Delete Appointment ------
     public static void deleteAppointment(int appointmentId) {
         try {
             String sql = "DELETE FROM appointments WHERE Appointment_ID = ?";
