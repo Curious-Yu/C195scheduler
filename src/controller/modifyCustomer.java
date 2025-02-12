@@ -26,6 +26,11 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for modifying a customer's information.
+ * Provides functionality to populate the modify form with selected customer data,
+ * save updates, and cancel the modification.
+ */
 public class modifyCustomer implements Initializable {
 
     //------ FXML Fields ------
@@ -39,9 +44,23 @@ public class modifyCustomer implements Initializable {
     @FXML public ComboBox<FirstLevelDivisions> customerDivision;
     @FXML public Button modifyCustomerSave;
     @FXML public Button modifyCustomerCancel;
-
     private Customers selectedCustomer;
 
+    /**
+     * Initializes the modify customer form by setting up the country and division ComboBoxes.
+     * <p>
+     * The following lambda expressions are used:
+     * <ul>
+     *   <li>In customerCountry.setConverter: converts a Countries object to its String representation.</li>
+     *   <li>In customerCountry.setCellFactory: creates a custom ListCell for Countries.</li>
+     *   <li>In customerDivision.setConverter: converts a FirstLevelDivisions object to its String representation.</li>
+     *   <li>In customerDivision.setCellFactory: creates a custom ListCell for FirstLevelDivisions.</li>
+     * </ul>
+     * </p>
+     *
+     * @param url the URL used to resolve relative paths for the root object, or null if not known
+     * @param resourceBundle the ResourceBundle for localization, or null if not provided
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //------ Initialize Country ComboBox ------
@@ -69,7 +88,6 @@ public class modifyCustomer implements Initializable {
                 setText(empty || country == null ? "" : country.getCountry());
             }
         });
-
         //------ Initialize Division ComboBox ------
         customerDivision.setItems(FXCollections.observableArrayList());
         customerDivision.setConverter(new StringConverter<FirstLevelDivisions>() {
@@ -91,21 +109,22 @@ public class modifyCustomer implements Initializable {
         });
     }
 
-    //------ Populate form with selected customer data ------
+    /**
+     * Populates the modify form with the selected customer's data.
+     *
+     * @param selectedCustomer the customer selected from the main page
+     */
     public void setCustomerData(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
         customerID.setText(String.valueOf(selectedCustomer.getCustomerId()));
-
         // Split full name into first and last names.
         String fullName = selectedCustomer.getCustomerName();
         String[] nameParts = fullName.split(" ", 2);
         customerFirstName.setText(nameParts.length > 0 ? nameParts[0] : "");
         customerLastName.setText(nameParts.length > 1 ? nameParts[1] : "");
-
         customerAddress.setText(selectedCustomer.getAddress());
         customerPostalCode.setText(selectedCustomer.getPostalCode());
         customerPhoneNumber.setText(selectedCustomer.getPhone());
-
         try {
             FirstLevelDivisions division = FirstLevelDivisionData.getFirstLevelDivisionById(selectedCustomer.getDivisionId());
             if (division != null) {
@@ -123,7 +142,12 @@ public class modifyCustomer implements Initializable {
         }
     }
 
-    //------ Save updated customer ------
+    /**
+     * Saves the updated customer data to the database.
+     * Validates that all required fields are filled before updating.
+     *
+     * @param actionEvent the ActionEvent triggered by clicking the Save button
+     */
     public void modifyCustomerSaveButton(ActionEvent actionEvent) {
         if (customerFirstName.getText().isEmpty() ||
                 customerLastName.getText().isEmpty() ||
@@ -139,7 +163,6 @@ public class modifyCustomer implements Initializable {
             alert.showAndWait();
             return;
         }
-
         String fullName = customerFirstName.getText().trim() + " " + customerLastName.getText().trim();
         String address = customerAddress.getText().trim();
         String postalCode = customerPostalCode.getText().trim();
@@ -147,13 +170,11 @@ public class modifyCustomer implements Initializable {
         int divisionId = customerDivision.getValue().getDivisionId();
         Customers updatedCustomer = new Customers(selectedCustomer.getCustomerId(), fullName, address, postalCode, phone, divisionId);
         CustomerData.updateCustomer(updatedCustomer);
-
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Customer Updated");
         successAlert.setHeaderText(null);
         successAlert.setContentText("The customer was successfully updated.");
         successAlert.showAndWait();
-
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
@@ -169,7 +190,11 @@ public class modifyCustomer implements Initializable {
         }
     }
 
-    //------ Cancel and return to main page ------
+    /**
+     * Cancels the modification and returns to the main page.
+     *
+     * @param actionEvent the ActionEvent triggered by clicking the Cancel button
+     */
     public void modifyCustomerCancelButton(ActionEvent actionEvent) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
@@ -186,12 +211,16 @@ public class modifyCustomer implements Initializable {
         }
     }
 
-    //------ Optional: Country dropdown event ------
+    /**
+     * Handles the country dropdown event.
+     */
     public void customerCountryDropdown(ActionEvent actionEvent) {
         // Additional logic can be added here if needed.
     }
 
-    //------ Optional: Division dropdown event ------
+    /**
+     * Handles the division dropdown event.
+     */
     public void customerDivisionDropdown(ActionEvent actionEvent) {
         // Additional logic can be added here if needed.
     }

@@ -26,6 +26,13 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for adding a new customer.
+ * <p>
+ * Handles populating the customer form with country and division data,
+ * validating input, saving the new customer, and navigating back to the main page.
+ * </p>
+ */
 public class addCustomer implements Initializable {
 
     //------ FXML Fields ------
@@ -43,12 +50,30 @@ public class addCustomer implements Initializable {
     //------ ObservableList for Countries ------
     private ObservableList<Countries> countriesList;
 
+    /**
+     * Initializes the add customer form.
+     * <p>
+     * Loads country data into the customerCountry ComboBox and sets up the corresponding
+     * cell converter and cell factory using lambda expressions.
+     * Also clears the customerDivision ComboBox.
+     *
+     * Lambda expressions used:
+     * <ul>
+     *   <li>In customerCountry.setConverter: converts a Countries object to its string representation.</li>
+     *   <li>In customerCountry.setCellFactory: creates a ListCell to display the country name.</li>
+     *   <li>In customerDivision.setConverter: converts a FirstLevelDivisions object to its string representation.</li>
+     *   <li>In customerDivision.setCellFactory: creates a ListCell to display the division name.</li>
+     * </ul>
+     * </p>
+     *
+     * @param url the URL used to resolve relative paths for the root object, or null if not known
+     * @param resourceBundle the ResourceBundle for localization, or null if not provided
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        //------ Set Customer ID as Auto-Gen ------
+        // Set Customer ID as Auto-Gen
         customerID.setText("Auto-Gen");
-
-        //------ Load Countries ------
+        // Load Countries
         countriesList = CountryData.getAllCountries();
         customerCountry.setItems(countriesList);
         customerCountry.setConverter(new StringConverter<Countries>() {
@@ -68,8 +93,7 @@ public class addCustomer implements Initializable {
                 setText(empty || country == null ? "" : country.getCountry());
             }
         });
-
-        //------ Clear Divisions ComboBox ------
+        // Clear Divisions ComboBox (will be loaded upon country selection)
         customerDivision.setItems(FXCollections.observableArrayList());
         customerDivision.setConverter(new StringConverter<FirstLevelDivisions>() {
             @Override
@@ -90,7 +114,15 @@ public class addCustomer implements Initializable {
         });
     }
 
-    //------ Save Customer ------
+    /**
+     * Saves the new customer to the database.
+     * <p>
+     * Validates that all required fields are filled, combines the first and last names,
+     * creates a new Customers object, saves it using CustomerData, and returns to the main page.
+     * </p>
+     *
+     * @param event the ActionEvent triggered by clicking the Save button
+     */
     @FXML
     private void addCustomerSaveButton(ActionEvent event) {
         // Validate fields
@@ -108,24 +140,20 @@ public class addCustomer implements Initializable {
             alert.showAndWait();
             return;
         }
-
         // Combine first and last names
         String customerName = customerFirstName.getText().trim() + " " + customerLastName.getText().trim();
         String address = customerAddress.getText().trim();
         String postalCode = customerPostalCode.getText().trim();
         String phone = customerPhoneNumber.getText().trim();
         int divisionId = customerDivision.getValue().getDivisionId();
-
         // Create new customer and save
         Customers newCustomer = new Customers(0, customerName, address, postalCode, phone, divisionId);
         CustomerData.addCustomer(newCustomer);
-
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Customer Added");
         successAlert.setHeaderText(null);
         successAlert.setContentText("The customer was successfully added.");
         successAlert.showAndWait();
-
         // Return to main page
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
@@ -142,7 +170,11 @@ public class addCustomer implements Initializable {
         }
     }
 
-    //------ Cancel and return to main page ------
+    /**
+     * Cancels adding a customer and returns to the main page.
+     *
+     * @param event the ActionEvent triggered by clicking the Cancel button
+     */
     @FXML
     private void addCustomerCancelButton(ActionEvent event) {
         try {
@@ -160,7 +192,11 @@ public class addCustomer implements Initializable {
         }
     }
 
-    //------ Load Divisions when a Country is selected ------
+    /**
+     * Loads the divisions for the selected country into the customerDivision ComboBox.
+     *
+     * @param event the ActionEvent triggered by selecting a country
+     */
     @FXML
     private void customerCountryDropdown(ActionEvent event) {
         Countries selectedCountry = customerCountry.getValue();
@@ -180,6 +216,9 @@ public class addCustomer implements Initializable {
         }
     }
 
+    /**
+     * Handles the division dropdown event.
+     */
     @FXML
     private void customerDivisionDropdown(ActionEvent event) {
         // Additional logic can be added here if needed.

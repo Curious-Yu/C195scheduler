@@ -32,9 +32,15 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
 
+/**
+ * Provides functionality for generating various reports such as:
+ * - A contact report listing appointment details.
+ * - A customer appointment count report grouped by appointment type and month.
+ * - An appointment location report grouped by country and state/province.
+ */
 public class report implements Initializable {
 
-    //------ Contact Report ------
+    //------ Contact Report UI Elements ------
     @FXML private TableView<Appointments> contactReportTable;
     @FXML private TableColumn<Appointments, String> reportApptID;
     @FXML private TableColumn<Appointments, String> reportApptTitle;
@@ -46,98 +52,152 @@ public class report implements Initializable {
     @FXML private TableColumn<Appointments, String> reportApptCustomerID;
     @FXML private ComboBox<Contacts> reportContact;
 
-    //------ Appointment Count by Type and Month Report ------
+    //------ Appointment Count by Type and Month Report UI Elements ------
     @FXML private TableView<CustomerApptReport> customerTypeMonthReportTable;
     @FXML private TableColumn<CustomerApptReport, String> reportCustomerApptMonth;
     @FXML private TableColumn<CustomerApptReport, String> reportCustomerApptType;
     @FXML private TableColumn<CustomerApptReport, Long> reportCustomerApptCount;
 
-    //------ Appointment Location Report ------
+    //------ Appointment Location Report UI Elements ------
     @FXML private TableView<CustomerLocationReport> apptLocationReportTable;
     @FXML private TableColumn<CustomerLocationReport, String> reportApptCountry;
     @FXML private TableColumn<CustomerLocationReport, String> reportApptStateProvince;
     @FXML private TableColumn<CustomerLocationReport, Long> reportApptCount;
-
     @FXML private Button reportBack;
 
-    //------ Inner class: Appointment Count Report ------
+    /**
+     * Inner class representing the appointment count report for a given month and type.
+     */
     public static class CustomerApptReport {
         private final String appointmentMonth;
         private final String appointmentType;
         private final long appointmentCount;
 
+        /**
+         * Constructs a CustomerApptReport.
+         *
+         * @param appointmentMonth the formatted appointment month (e.g., "February 2020")
+         * @param appointmentType  the appointment type
+         * @param appointmentCount the count of appointments for the month and type
+         */
         public CustomerApptReport(String appointmentMonth, String appointmentType, long appointmentCount) {
             this.appointmentMonth = appointmentMonth;
             this.appointmentType = appointmentType;
             this.appointmentCount = appointmentCount;
         }
 
+        /**
+         * @return the appointment month
+         */
         public String getAppointmentMonth() {
             return appointmentMonth;
         }
 
+        /**
+         * @return the appointment type
+         */
         public String getAppointmentType() {
             return appointmentType;
         }
 
+        /**
+         * @return the appointment count
+         */
         public long getAppointmentCount() {
             return appointmentCount;
         }
     }
 
-    //------ Inner class: Appointment Location Report ------
+    /**
+     * Inner class representing the appointment location report.
+     */
     public static class CustomerLocationReport {
         private final String country;
         private final String state;
         private final long count;
 
+        /**
+         * Constructs a CustomerLocationReport.
+         *
+         * @param country the country name
+         * @param state   the state/province name
+         * @param count   the count of appointments for that location
+         */
         public CustomerLocationReport(String country, String state, long count) {
             this.country = country;
             this.state = state;
             this.count = count;
         }
 
+        /**
+         * @return the country name
+         */
         public String getCountry() {
             return country;
         }
 
+        /**
+         * @return the state/province name
+         */
         public String getState() {
             return state;
         }
 
+        /**
+         * @return the appointment count
+         */
         public long getCount() {
             return count;
         }
     }
 
+    /**
+     * Initializes the report view by setting up tables, columns, and data.
+     *
+     * <p>
+     * The following lambda expressions are used:
+     * <ul>
+     *   <li>Each cell value factory for the appointment columns converts a property (e.g., appointment ID)
+     *       to a StringProperty using a lambda expression.</li>
+     *   <li>The lambda in reportContact.setConverter converts a Contacts object to its string representation.</li>
+     *   <li>The lambda in reportContact.setCellFactory creates a custom ListCell for displaying Contacts.</li>
+     *   <li>Lambda expressions in the stream operations group appointments by month and type, sort months, and group by location.</li>
+     * </ul>
+     * </p>
+     *
+     * @param url the URL used to resolve relative paths for the root object, or null if not known
+     * @param resourceBundle the ResourceBundle for localization, or null if not provided
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //------ Contact Report Setup ------
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         reportApptID.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.valueOf(cellData.getValue().getAppointmentId())));
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getAppointmentId()))); // Lambda: Converts appointment ID to StringProperty.
         reportApptTitle.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getTitle()));
+                new SimpleStringProperty(cellData.getValue().getTitle())); // Lambda: Converts title to StringProperty.
         reportApptType.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getType()));
+                new SimpleStringProperty(cellData.getValue().getType())); // Lambda: Converts type to StringProperty.
         reportApptDescription.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getDescription()));
+                new SimpleStringProperty(cellData.getValue().getDescription())); // Lambda: Converts description to StringProperty.
         reportApptAddress.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getLocation()));
+                new SimpleStringProperty(cellData.getValue().getLocation())); // Lambda: Converts location to StringProperty.
         reportApptStart.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
+                new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter))); // Lambda: Formats startDateTime to StringProperty.
         reportApptEnd.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
+                new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter))); // Lambda: Formats endDateTime to StringProperty.
         reportApptCustomerID.setCellValueFactory(cellData ->
-                new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId()))); // Lambda: Converts customer ID to StringProperty.
         contactReportTable.setItems(AppointmentData.getAllAppointments());
 
         reportContact.setItems(ContactData.getAllContacts());
         reportContact.setConverter(new StringConverter<Contacts>() {
             @Override
             public String toString(Contacts contact) {
+                // Lambda in setConverter: Converts a Contacts object to its string representation.
                 return (contact == null) ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")";
             }
+
             @Override
             public Contacts fromString(String string) {
                 return null;
@@ -147,6 +207,7 @@ public class report implements Initializable {
             @Override
             protected void updateItem(Contacts contact, boolean empty) {
                 super.updateItem(contact, empty);
+                // Lambda in setCellFactory: Sets the cell text for a Contacts object.
                 setText(empty || contact == null ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")");
             }
         });
@@ -157,12 +218,15 @@ public class report implements Initializable {
         reportCustomerApptCount.setCellValueFactory(new PropertyValueFactory<>("appointmentCount"));
 
         DateTimeFormatter monthFormatter = DateTimeFormatter.ofPattern("MMMM yyyy");
+        // Lambda: Group appointments by formatted month and type, counting the number in each group.
         Map<String, Map<String, Long>> groupedData = AppointmentData.getAllAppointments().stream()
                 .collect(Collectors.groupingBy(
                         appt -> appt.getStartDateTime().format(monthFormatter),
                         Collectors.groupingBy(Appointments::getType, Collectors.counting())
                 ));
+
         DateTimeFormatter parseFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
+        // Lambda: Sort the month keys from groupedData chronologically.
         List<String> sortedMonths = groupedData.keySet().stream()
                 .sorted((m1, m2) -> {
                     try {
@@ -175,9 +239,11 @@ public class report implements Initializable {
                     }
                 })
                 .collect(Collectors.toList());
+
         ObservableList<CustomerApptReport> apptReportData = FXCollections.observableArrayList();
         for (String month : sortedMonths) {
             Map<String, Long> typeMap = groupedData.get(month);
+            // Loop through each appointment type and add a CustomerApptReport.
             for (Map.Entry<String, Long> entry : typeMap.entrySet()) {
                 apptReportData.add(new CustomerApptReport(month, entry.getKey(), entry.getValue()));
             }
@@ -193,11 +259,12 @@ public class report implements Initializable {
         ObservableList<model.Customers> allCustomers = CustomerData.getAllCustomers();
         ObservableList<CustomerLocationReport> locationReports = FXCollections.observableArrayList();
 
+        // Lambda: Group appointments by customer location (country and state) using customer division.
         Map<String, Long> locationGrouping = allAppointments.stream().collect(Collectors.groupingBy(
                 appt -> {
                     int custId = appt.getCustomerId();
                     model.Customers cust = allCustomers.stream()
-                            .filter(c -> c.getCustomerId() == custId)
+                            .filter(c -> c.getCustomerId() == custId) // Lambda: Filter to match customer ID.
                             .findFirst().orElse(null);
                     if (cust != null) {
                         int divisionId = cust.getDivisionId();
@@ -224,6 +291,7 @@ public class report implements Initializable {
             String state = parts.length > 1 ? parts[1] : "N/A";
             locationReports.add(new CustomerLocationReport(country, state, count));
         });
+        // Lambda: Sort the location reports by country and state.
         locationReports.sort((r1, r2) -> {
             int cmp = r1.getCountry().compareTo(r2.getCountry());
             return (cmp == 0) ? r1.getState().compareTo(r2.getState()) : cmp;
@@ -234,12 +302,18 @@ public class report implements Initializable {
         // (Additional initialization as needed)
     }
 
+    /**
+     * Handles the contact dropdown selection and filters the contact report table.
+     *
+     * @param event the ActionEvent triggered by selecting a contact
+     */
     @FXML
     private void reportContactDropdown(ActionEvent event) {
         Contacts selectedContact = reportContact.getValue();
         if (selectedContact != null) {
             ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
             ObservableList<Appointments> filteredAppointments = FXCollections.observableArrayList();
+            // Lambda: Iterate through appointments and add those matching the selected contact.
             for (Appointments appt : allAppointments) {
                 if (appt.getContactId() == selectedContact.getContactId()) {
                     filteredAppointments.add(appt);
@@ -249,6 +323,11 @@ public class report implements Initializable {
         }
     }
 
+    /**
+     * Handles the back button action to return to the main page.
+     *
+     * @param event the ActionEvent triggered by the back button
+     */
     @FXML
     private void reportBackButton(ActionEvent event) {
         try {

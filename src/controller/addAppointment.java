@@ -29,6 +29,13 @@ import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for adding a new appointment.
+ * <p>
+ * This controller handles populating the add appointment form, validating user input,
+ * creating and saving a new appointment, and returning to the main page.
+ * </p>
+ */
 public class addAppointment implements Initializable {
 
     //------ FXML Fields ------
@@ -47,6 +54,23 @@ public class addAppointment implements Initializable {
     @FXML private Button addApptSave;
     @FXML private Button addApptCancel;
 
+    /**
+     * Initializes the add appointment form.
+     * <p>
+     * Populates the start and end time ChoiceBoxes with 5-minute increments, and sets up the
+     * Contacts, Customers, and Users ComboBoxes with appropriate converters and cell factories.
+     * <br>
+     * Lambda expressions used:
+     * <ul>
+     *   <li>In the converter for apptContactID: converts a Contacts object to a String.</li>
+     *   <li>In the cell factory for apptContactID: creates a custom ListCell to display contact details.</li>
+     *   <li>Similarly for apptCustomerID and apptUserID converters and cell factories.</li>
+     * </ul>
+     * </p>
+     *
+     * @param url the URL used to resolve relative paths for the root object, or null if not known
+     * @param resourceBundle the ResourceBundle for localization, or null if not provided
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
         //------ Populate Time ChoiceBoxes ------
@@ -59,7 +83,6 @@ public class addAppointment implements Initializable {
                 apptEndTime.getItems().add(timeStr);
             }
         }
-
         //------ Set up Contacts ComboBox ------
         apptContactID.setItems(ContactData.getAllContacts());
         apptContactID.setConverter(new StringConverter<Contacts>() {
@@ -69,7 +92,7 @@ public class addAppointment implements Initializable {
             }
             @Override
             public Contacts fromString(String string) {
-                return null;
+                return null; // Not needed.
             }
         });
         apptContactID.setCellFactory(comboBox -> new ListCell<Contacts>() {
@@ -79,7 +102,6 @@ public class addAppointment implements Initializable {
                 setText(empty || contact == null ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")");
             }
         });
-
         //------ Set up Customers ComboBox ------
         apptCustomerID.setItems(CustomerData.getAllCustomers());
         apptCustomerID.setConverter(new StringConverter<Customers>() {
@@ -89,7 +111,7 @@ public class addAppointment implements Initializable {
             }
             @Override
             public Customers fromString(String string) {
-                return null;
+                return null; // Not needed.
             }
         });
         apptCustomerID.setCellFactory(comboBox -> new ListCell<Customers>() {
@@ -99,7 +121,6 @@ public class addAppointment implements Initializable {
                 setText(empty || customer == null ? "" : customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
             }
         });
-
         //------ Set up Users ComboBox ------
         apptUserID.setItems(UsersData.getAllUsers());
         apptUserID.setConverter(new StringConverter<Users>() {
@@ -109,7 +130,7 @@ public class addAppointment implements Initializable {
             }
             @Override
             public Users fromString(String string) {
-                return null;
+                return null; // Not needed.
             }
         });
         apptUserID.setCellFactory(comboBox -> new ListCell<Users>() {
@@ -119,12 +140,20 @@ public class addAppointment implements Initializable {
                 setText(empty || user == null ? "" : user.getUserName() + " (ID: " + user.getUserId() + ")");
             }
         });
-
         //------ Set Appointment ID ------
         apptID.setText("Auto-Gen");
     }
 
-    //------ Save Appointment ------
+    /**
+     * Handles the Save button action to add a new appointment.
+     * <p>
+     * Validates that all required fields are completed, ensures the appointment end time is after the start time,
+     * validates business hours (8:00 AM to 10:00 PM Eastern Time), checks for overlapping appointments,
+     * creates a new appointment, saves it to the database, and returns to the main page.
+     * </p>
+     *
+     * @param event the ActionEvent triggered by clicking the Save button
+     */
     @FXML
     private void AddApptSaveAction(ActionEvent event) {
         // Validate required fields
@@ -146,7 +175,6 @@ public class addAppointment implements Initializable {
             alert.showAndWait();
             return;
         }
-
         try {
             // Combine date and time values
             LocalDate startDate = apptStartDate.getValue();
@@ -155,7 +183,6 @@ public class addAppointment implements Initializable {
             LocalTime endTime = LocalTime.parse(apptEndTime.getValue());
             LocalDateTime startDateTime = startDate.atTime(startTime);
             LocalDateTime endDateTime = endDate.atTime(endTime);
-
             // Validate end time is after start time
             if (!endDateTime.isAfter(startDateTime)) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -165,7 +192,6 @@ public class addAppointment implements Initializable {
                 alert.showAndWait();
                 return;
             }
-
             // Business hours validation (8:00 AM - 10:00 PM ET)
             ZoneId easternZone = ZoneId.of("America/New_York");
             ZonedDateTime startEastern = startDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
@@ -180,7 +206,6 @@ public class addAppointment implements Initializable {
                 alert.showAndWait();
                 return;
             }
-
             // Overlapping appointment validation
             int customerID = apptCustomerID.getValue().getCustomerId();
             ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
@@ -197,7 +222,6 @@ public class addAppointment implements Initializable {
                     }
                 }
             }
-
             // Retrieve field values
             String title = apptTitle.getText();
             String description = apptDescription.getText();
@@ -205,19 +229,16 @@ public class addAppointment implements Initializable {
             String type = apptType.getText();
             int contactID = apptContactID.getValue().getContactId();
             int userID = apptUserID.getValue().getUserId();
-
             // Create and save appointment
             Appointments newAppointment = new Appointments(
                     0, title, description, location, type,
                     startDateTime, endDateTime, customerID, userID, contactID);
             AppointmentData.addAppointment(newAppointment);
-
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Appointment Added");
             successAlert.setHeaderText(null);
             successAlert.setContentText("The appointment was successfully added.");
             successAlert.showAndWait();
-
             // Return to main page
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
@@ -233,7 +254,11 @@ public class addAppointment implements Initializable {
         }
     }
 
-    //------ Cancel and return to main page ------
+    /**
+     * Cancels adding an appointment and returns to the main page.
+     *
+     * @param event the ActionEvent triggered by clicking the Cancel button
+     */
     @FXML
     private void AddApptCancelAction(ActionEvent event) {
         try {

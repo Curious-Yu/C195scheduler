@@ -21,6 +21,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 import java.util.ResourceBundle;
 
+/**
+ * Controller for handling user login functionality.
+ * <p>
+ * This class initializes the login view, validates user credentials, logs login attempts,
+ * and navigates to the main page upon successful login.
+ * </p>
+ */
 public class login implements Initializable {
 
     //------ FXML Fields ------
@@ -38,12 +45,20 @@ public class login implements Initializable {
     //------ Resource Bundle for Language Support ------
     private ResourceBundle rb;
 
+    /**
+     * Initializes the login view.
+     * <p>
+     * Loads the resource bundle for localization, sets UI texts and prompts, and displays the local time zone.
+     * </p>
+     *
+     * @param url the URL used to resolve relative paths for the root object, or null if not known
+     * @param resourceBundle the ResourceBundle for localization, or null if not provided
+     */
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        //------ Load Resource Bundle ------
+        // Load Resource Bundle
         rb = (resourceBundle == null) ? ResourceBundle.getBundle("login") : resourceBundle;
-
-        //------ Set UI Texts ------
+        // Set UI texts from the resource bundle.
         LoginLabel.setText(rb.getString("LoginLabel"));
         LoginMessageLabel.setText(rb.getString("LoginMessageLabel"));
         UserNameLabel.setText(rb.getString("UserNameLabel"));
@@ -55,7 +70,7 @@ public class login implements Initializable {
         LoginSubmitButton.setText(rb.getString("LoginSubmitButton.text"));
         LoginCancelButton.setText(rb.getString("LoginCancelButton.text"));
 
-        //------ Set LocationBox with Local Time and Zone ------
+        // Set LocationBox with local time and zone.
         ZoneId zone = ZoneId.systemDefault();
         ZonedDateTime now = ZonedDateTime.now(zone);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -66,13 +81,20 @@ public class login implements Initializable {
         LocationBox.setText(city + ", " + region + " - " + formattedTime);
     }
 
-    //------ Handle Submit Button Action ------
+    /**
+     * Handles the login submit button action.
+     * <p>
+     * Validates the input fields, checks user credentials, logs the login attempt,
+     * and navigates to the main page upon successful login.
+     * </p>
+     *
+     * @param event the ActionEvent triggered by clicking the submit button
+     */
     @FXML
     private void LoginSubmitButtonAction(ActionEvent event) {
         String username = UserNameBox.getText().trim();
         String password = PasswordBox.getText().trim();
-
-        //------ Validate Fields ------
+        // Validate fields.
         if (username.isEmpty() || password.isEmpty()) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle(rb.getString("Alert"));
@@ -82,8 +104,7 @@ public class login implements Initializable {
             LoginActivityLogger.logAttempt(username, false); // Log failure
             return;
         }
-
-        //------ Validate Credentials ------
+        // Validate credentials.
         Users user = UsersData.validateUser(username, password);
         if (user == null) {
             Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -94,14 +115,13 @@ public class login implements Initializable {
             LoginActivityLogger.logAttempt(username, false); // Log failure
             return;
         }
-
-        //------ Successful Login ------
+        // Successful login.
         LoginActivityLogger.logAttempt(username, true); // Log success
         LoginMessageLabel.setText(String.format(rb.getString("SuccessMessage"), user.getUserName()));
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"), rb);
             Parent root = loader.load();
-            Stage stage = (Stage)((Node) event.getSource()).getScene().getWindow();
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.setScene(new Scene(root));
             stage.show();
         } catch (IOException e) {
@@ -114,7 +134,14 @@ public class login implements Initializable {
         }
     }
 
-    //------ Handle Cancel Button Action ------
+    /**
+     * Handles the login cancel button action.
+     * <p>
+     * Prompts the user for confirmation and, if confirmed, closes the database connection and exits the application.
+     * </p>
+     *
+     * @param event the ActionEvent triggered by clicking the cancel button
+     */
     @FXML
     private void LoginCancelButtonAction(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);

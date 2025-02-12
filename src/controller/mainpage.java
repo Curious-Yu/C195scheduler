@@ -28,6 +28,20 @@ import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
+/**
+ * Main page controller for the C195 Scheduler application.
+ * <p>
+ * Provides event handlers to load different views (add, modify, delete appointments and customers),
+ * filter appointments, display the current time zone, and check for upcoming appointments.
+ * <br>
+ * Lambda expressions are used in:
+ * <ul>
+ *   <li>Setting cell value factories for appointment and customer TableColumns (convert properties to StringProperty).</li>
+ *   <li>Setting up FilteredList in OnCurrentMonthRadio and OnCurrentWeekRadio for filtering appointments.</li>
+ *   <li>In lambda expressions within the initialize method for state and country column lookups.</li>
+ * </ul>
+ * </p>
+ */
 public class mainpage {
 
     //------ TableViews ------
@@ -77,7 +91,11 @@ public class mainpage {
 
     //------ Event Handlers ------
 
-    // Open addAppointment view
+    /**
+     * Opens the addAppointment view.
+     *
+     * @param event the ActionEvent triggered by clicking the add appointment button
+     */
     @FXML
     private void addAppointmentActionButton(ActionEvent event) {
         try {
@@ -90,7 +108,11 @@ public class mainpage {
         }
     }
 
-    // Open modifyAppointment view with selected appointment data
+    /**
+     * Opens the modifyAppointment view with the selected appointment data.
+     *
+     * @param event the ActionEvent triggered by clicking the modify appointment button
+     */
     @FXML
     private void modifyAppointmentActionButton(ActionEvent event) {
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
@@ -114,7 +136,11 @@ public class mainpage {
         }
     }
 
-    // Delete selected appointment
+    /**
+     * Deletes the selected appointment after confirmation.
+     *
+     * @param event the ActionEvent triggered by clicking the delete appointment button
+     */
     @FXML
     private void deleteAppointmentActionButton(ActionEvent event) {
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
@@ -150,7 +176,11 @@ public class mainpage {
         }
     }
 
-    // Open addCustomer view
+    /**
+     * Opens the addCustomer view.
+     *
+     * @param event the ActionEvent triggered by clicking the add customer button
+     */
     @FXML
     private void addCustomerActionButton(ActionEvent event) {
         try {
@@ -168,7 +198,11 @@ public class mainpage {
         }
     }
 
-    // Open modifyCustomer view with selected customer data
+    /**
+     * Opens the modifyCustomer view with the selected customer data.
+     *
+     * @param event the ActionEvent triggered by clicking the modify customer button
+     */
     @FXML
     private void modifyCustomerActionButton(ActionEvent event) {
         Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
@@ -197,7 +231,11 @@ public class mainpage {
         }
     }
 
-    // Delete customer and associated appointments
+    /**
+     * Deletes the selected customer and all associated appointments after confirmation.
+     *
+     * @param event the ActionEvent triggered by clicking the delete customer button
+     */
     @FXML
     private void deleteCustomerActionButton(ActionEvent event) {
         Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
@@ -212,6 +250,7 @@ public class mainpage {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
         StringBuilder appointmentsDetails = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        // Loop through appointments to list those for the selected customer.
         for (Appointments appt : allAppointments) {
             if (appt.getCustomerId() == selectedCustomer.getCustomerId()) {
                 appointmentsDetails.append("Appointment ID: ").append(appt.getAppointmentId())
@@ -221,20 +260,20 @@ public class mainpage {
                         .append("\n");
             }
         }
-        String customerDetails = "Customer ID: " + selectedCustomer.getCustomerId() + "\n" +
-                "Customer Name: " + selectedCustomer.getCustomerName() + "\n" +
-                "Address: " + selectedCustomer.getAddress() + "\n" +
-                "Postal Code: " + selectedCustomer.getPostalCode() + "\n" +
-                "Phone: " + selectedCustomer.getPhone();
+        String customerDetails = "Customer ID: " + selectedCustomer.getCustomerId() + "\n"
+                + "Customer Name: " + selectedCustomer.getCustomerName() + "\n"
+                + "Address: " + selectedCustomer.getAddress() + "\n"
+                + "Postal Code: " + selectedCustomer.getPostalCode() + "\n"
+                + "Phone: " + selectedCustomer.getPhone();
         String confirmationMessage;
         if (appointmentsDetails.length() > 0) {
-            confirmationMessage = "Deleting this customer will also delete the following appointments:\n\n" +
-                    appointmentsDetails.toString() +
-                    "\nCustomer Details:\n" + customerDetails +
-                    "\n\nDo you want to proceed?";
+            confirmationMessage = "Deleting this customer will also delete the following appointments:\n\n"
+                    + appointmentsDetails.toString()
+                    + "\nCustomer Details:\n" + customerDetails
+                    + "\n\nDo you want to proceed?";
         } else {
-            confirmationMessage = "Customer Details:\n" + customerDetails +
-                    "\n\nThere are no appointments for this customer.\nDo you want to proceed with deletion?";
+            confirmationMessage = "Customer Details:\n" + customerDetails
+                    + "\n\nThere are no appointments for this customer.\nDo you want to proceed with deletion?";
         }
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirm Delete Customer");
@@ -260,7 +299,11 @@ public class mainpage {
         }
     }
 
-    // Exit application and close DB connection
+    /**
+     * Exits the application after confirming with the user and closes the database connection.
+     *
+     * @param event the ActionEvent triggered by clicking the exit button
+     */
     @FXML
     private void exitActionButton(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -275,7 +318,11 @@ public class mainpage {
         });
     }
 
-    // Open reports view
+    /**
+     * Opens the reports view.
+     *
+     * @param event the ActionEvent triggered by clicking the reports button
+     */
     @FXML
     private void reportsActionButton(ActionEvent event) {
         try {
@@ -293,18 +340,27 @@ public class mainpage {
         }
     }
 
-    // Filter all appointments
+    /**
+     * Filters and displays all appointments.
+     *
+     * @param event the ActionEvent triggered by selecting the "All Time" radio button
+     */
     @FXML
     private void OnAllTimeRadio(ActionEvent event) {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
         appointmentTable.setItems(allAppointments);
     }
 
-    // Filter appointments by current month
+    /**
+     * Filters appointments to display only those in the current month.
+     *
+     * @param event the ActionEvent triggered by selecting the "Current Month" radio button
+     */
     @FXML
     private void OnCurrentMonthRadio(ActionEvent event) {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
         LocalDate today = LocalDate.now();
+        // Lambda: Filters appointments by checking if the appointment's month and year match today's.
         FilteredList<Appointments> filteredAppointments = new FilteredList<>(allAppointments, appointment -> {
             LocalDate appointmentDate = appointment.getStartDateTime().toLocalDate();
             return (appointmentDate.getMonthValue() == today.getMonthValue()) &&
@@ -313,7 +369,11 @@ public class mainpage {
         appointmentTable.setItems(filteredAppointments);
     }
 
-    // Filter appointments by current week
+    /**
+     * Filters appointments to display only those in the current week.
+     *
+     * @param event the ActionEvent triggered by selecting the "Current Week" radio button
+     */
     @FXML
     private void OnCurrentWeekRadio(ActionEvent event) {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
@@ -321,6 +381,7 @@ public class mainpage {
         int dayOfWeek = today.getDayOfWeek().getValue(); // Monday=1, Sunday=7
         LocalDate startOfWeek = today.minusDays(dayOfWeek - 1);
         LocalDate endOfWeek = today.plusDays(7 - dayOfWeek);
+        // Lambda: Filters appointments by checking if the appointment's date falls within the current week.
         FilteredList<Appointments> filteredAppointments = new FilteredList<>(allAppointments, appointment -> {
             LocalDate appointmentDate = appointment.getStartDateTime().toLocalDate();
             return (!appointmentDate.isBefore(startOfWeek)) && (!appointmentDate.isAfter(endOfWeek));
@@ -328,7 +389,20 @@ public class mainpage {
         appointmentTable.setItems(filteredAppointments);
     }
 
-    //------ Initialize tables and time zone ------
+    /**
+     * Initializes the main page.
+     * <p>
+     * Sets up appointment and customer table columns, loads data, displays the current time zone,
+     * and checks for upcoming appointments.
+     * <br>
+     * Lambdas used in this method:
+     * <ul>
+     *   <li>Cell value factories for appointment and customer columns convert properties to StringProperty.</li>
+     *   <li>Filter lambdas in OnCurrentMonthRadio and OnCurrentWeekRadio.</li>
+     *   <li>Lambda expressions for stateColumn and countryColumn lookups.</li>
+     * </ul>
+     * </p>
+     */
     public void initialize() {
         // Appointment table columns
         appointmentIDColumn.setCellValueFactory(cellData -> cellData.getValue().appointmentIdProperty().asString());
@@ -337,19 +411,29 @@ public class mainpage {
         locationColumn.setCellValueFactory(cellData -> cellData.getValue().locationProperty());
         typeColumn.setCellValueFactory(cellData -> cellData.getValue().typeProperty());
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        startsAtColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
-        endsAtColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
+        // Lambda: Format startDateTime as StringProperty.
+        startsAtColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
+        // Lambda: Format endDateTime as StringProperty.
+        endsAtColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
         customerIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty().asString());
         userIdColumn.setCellValueFactory(cellData -> cellData.getValue().userIdProperty().asString());
         contactIdColumn.setCellValueFactory(cellData -> cellData.getValue().contactIdProperty().asString());
 
         // Customer table columns
-        customerIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
-        nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCustomerName()));
-        addressColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAddress()));
-        postalCodeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPostalCode()));
-        phoneColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
-        divisionIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getDivisionId())));
+        customerIDColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
+        nameColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getCustomerName()));
+        addressColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getAddress()));
+        postalCodeColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPostalCode()));
+        phoneColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getPhone()));
+        divisionIDColumn.setCellValueFactory(cellData ->
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getDivisionId())));
 
         // State column: lookup division name using division ID.
         ObservableList<FirstLevelDivisions> divisions = FXCollections.observableArrayList();
@@ -358,6 +442,7 @@ public class mainpage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // Lambda: Filter divisions by divisionId and map to division name.
         stateColumn.setCellValueFactory(cellData -> {
             int divisionId = cellData.getValue().getDivisionId();
             String stateName = divisions.stream()
@@ -375,6 +460,7 @@ public class mainpage {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        // Lambda: Filter divisions to find countryId, then filter countries to get country name.
         countryColumn.setCellValueFactory(cellData -> {
             int divisionId = cellData.getValue().getDivisionId();
             String countryName = divisions.stream()
@@ -392,7 +478,7 @@ public class mainpage {
             return new SimpleStringProperty(countryName);
         });
 
-        // Time zone display
+        // Time zone display.
         ZoneId zone = ZoneId.systemDefault();
         ZonedDateTime now = ZonedDateTime.now(zone);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -403,25 +489,29 @@ public class mainpage {
         String city = (zoneParts.length > 1) ? zoneParts[1].replace('_', ' ') : "";
         currentTimeZone.setText(city + ", " + region + " - " + formattedTime);
 
-        // Default radio button and load appointments
+        // Default radio button and load appointments.
         allTimeRadio.setSelected(true);
         OnAllTimeRadio(null);
 
-        // Load customer data
+        // Load customer data.
         ObservableList<Customers> customersList = CustomerData.getAllCustomers();
         customerTable.setItems(customersList);
 
-        // Check upcoming appointments
+        // Check upcoming appointments.
         checkUpcomingAppointments();
     }
 
-    //------ Check upcoming appointments within 15 minutes ------
+    /**
+     * Checks for appointments starting within the next 15 minutes and displays an alert.
+     * If none are found, displays an informational message.
+     */
     private void checkUpcomingAppointments() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime thresholdUtc = now.plusMinutes(15);
         ObservableList<Appointments> appointments = AppointmentData.getAllAppointments();
         StringBuilder alertMsg = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        // Loop through appointments and check if they start within the next 15 minutes.
         for (Appointments appt : appointments) {
             LocalDateTime apptStart = appt.getStartDateTime();
             if ((apptStart.isEqual(now) || apptStart.isAfter(now)) && apptStart.isBefore(thresholdUtc)) {
