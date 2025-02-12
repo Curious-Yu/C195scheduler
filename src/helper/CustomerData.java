@@ -7,15 +7,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Provides data access methods for Customer objects.
+ */
 public abstract class CustomerData {
 
-    //------ Retrieve All Customers ------
+    /**
+     * Retrieves all customers from the database.
+     *
+     * @return an ObservableList of Customers objects
+     */
     public static ObservableList<Customers> getAllCustomers() {
         ObservableList<Customers> customerList = FXCollections.observableArrayList();
         try {
             String sql = "SELECT * FROM customers";
             PreparedStatement ps = JDBC.connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
+            // Iterate over the ResultSet and create Customers objects.
             while (rs.next()) {
                 Customers customer = new Customers(rs);
                 customerList.add(customer);
@@ -26,7 +34,11 @@ public abstract class CustomerData {
         return customerList;
     }
 
-    //------ Add New Customer ------
+    /**
+     * Adds a new customer to the database.
+     *
+     * @param customer the Customers object containing the new customer data
+     */
     public static void addCustomer(Customers customer) {
         try {
             String sql = "INSERT INTO customers (Customer_Name, Address, Postal_Code, Phone, Division_ID) VALUES (?, ?, ?, ?, ?)";
@@ -42,7 +54,11 @@ public abstract class CustomerData {
         }
     }
 
-    //------ Update Existing Customer ------
+    /**
+     * Updates an existing customer in the database.
+     *
+     * @param customer the Customers object containing updated customer data
+     */
     public static void updateCustomer(Customers customer) {
         try {
             String sql = "UPDATE customers SET Customer_Name = ?, Address = ?, Postal_Code = ?, Phone = ?, Division_ID = ? WHERE Customer_ID = ?";
@@ -59,7 +75,11 @@ public abstract class CustomerData {
         }
     }
 
-    //------ Delete Customer ------
+    /**
+     * Deletes a customer from the database.
+     *
+     * @param customerId the ID of the customer to delete
+     */
     public static void deleteCustomer(int customerId) {
         try {
             String sql = "DELETE FROM customers WHERE Customer_ID = ?";

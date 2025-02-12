@@ -7,15 +7,23 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Provides methods to access country data from the database.
+ */
 public abstract class CountryData {
 
-    //------ Get All Countries ------
+    /**
+     * Retrieves all countries from the database.
+     *
+     * @return an ObservableList of Countries objects
+     */
     public static ObservableList<Countries> getAllCountries() {
         ObservableList<Countries> countryList = FXCollections.observableArrayList();
         try {
             String sql = "SELECT * FROM countries";
             PreparedStatement ps = JDBC.connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
+            // Iterate through each row in the ResultSet to create a Countries object.
             while (rs.next()) {
                 int countryId = rs.getInt("Country_ID");
                 String countryName = rs.getString("Country");
@@ -27,7 +35,12 @@ public abstract class CountryData {
         return countryList;
     }
 
-    //------ Get Country by ID ------
+    /**
+     * Retrieves a country from the database by its ID.
+     *
+     * @param countryId the unique identifier of the country to retrieve
+     * @return a Countries object if found; otherwise, null
+     */
     public static Countries getCountryById(int countryId) {
         Countries country = null;
         try {
@@ -35,6 +48,7 @@ public abstract class CountryData {
             PreparedStatement ps = JDBC.connection.prepareStatement(sql);
             ps.setInt(1, countryId);
             ResultSet rs = ps.executeQuery();
+            // If a matching row is found, create and return a Countries object.
             if (rs.next()) {
                 int id = rs.getInt("Country_ID");
                 String countryName = rs.getString("Country");

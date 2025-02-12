@@ -7,9 +7,17 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Provides data access methods for first-level division information.
+ */
 public class FirstLevelDivisionData {
 
-    //------ Get All Divisions ------
+    /**
+     * Retrieves all first-level divisions from the database.
+     *
+     * @return a List of FirstLevelDivisions objects
+     * @throws SQLException if an SQL error occurs
+     */
     public static List<FirstLevelDivisions> getAllFirstLevelDivisions() throws SQLException {
         List<FirstLevelDivisions> divisionsList = new ArrayList<>();
         String sql = "SELECT * FROM first_level_divisions";
@@ -26,7 +34,13 @@ public class FirstLevelDivisionData {
         return divisionsList;
     }
 
-    //------ Get Division by ID ------
+    /**
+     * Retrieves a first-level division by its ID.
+     *
+     * @param divisionId the division ID to search for
+     * @return a FirstLevelDivisions object if found; otherwise, null
+     * @throws SQLException if an SQL error occurs
+     */
     public static FirstLevelDivisions getFirstLevelDivisionById(int divisionId) throws SQLException {
         String sql = "SELECT * FROM first_level_divisions WHERE Division_ID = ?";
         PreparedStatement statement = JDBC.connection.prepareStatement(sql);
@@ -42,7 +56,13 @@ public class FirstLevelDivisionData {
         return null;
     }
 
-    //------ Get Divisions by Country ID ------
+    /**
+     * Retrieves all first-level divisions for a given country ID.
+     *
+     * @param countryId the country ID to filter by
+     * @return a List of FirstLevelDivisions objects for the specified country
+     * @throws SQLException if an SQL error occurs
+     */
     public static List<FirstLevelDivisions> getDivisionsByCountryId(int countryId) throws SQLException {
         List<FirstLevelDivisions> divisionsList = new ArrayList<>();
         String sql = "SELECT * FROM first_level_divisions WHERE Country_ID = ?";
@@ -60,7 +80,12 @@ public class FirstLevelDivisionData {
         return divisionsList;
     }
 
-    //------ Get Division Names by Country ID ------
+    /**
+     * Retrieves a list of division names for a given country ID.
+     *
+     * @param countryId the country ID to filter by
+     * @return a List of Strings representing division names for the specified country
+     */
     public static List<String> getDivisionsByCountry(int countryId) {
         List<String> divisionsList = new ArrayList<>();
         String sql = "SELECT Division FROM first_level_divisions WHERE Country_ID = ?";
@@ -77,7 +102,12 @@ public class FirstLevelDivisionData {
         return divisionsList;
     }
 
-    //------ Get Division ID by Name ------
+    /**
+     * Retrieves the division ID corresponding to the specified division name.
+     *
+     * @param division the name of the division
+     * @return the Division_ID if found; otherwise, -1
+     */
     public static int getDivisionIdByName(String division) {
         String sql = "SELECT Division_ID FROM first_level_divisions WHERE Division = ?";
         try {

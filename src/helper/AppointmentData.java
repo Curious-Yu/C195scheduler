@@ -6,15 +6,24 @@ import model.Appointments;
 import java.sql.*;
 import java.time.LocalDateTime;
 
+/**
+ * Provides data access methods for retrieving, adding, updating, and deleting
+ * appointment records in the database.
+ */
 public abstract class AppointmentData {
 
-    //------ Retrieve All Appointments ------
+    /**
+     * Retrieves all appointments from the database.
+     *
+     * @return an ObservableList of Appointments objects representing all appointments
+     */
     public static ObservableList<Appointments> getAllAppointments() {
         ObservableList<Appointments> appointmentList = FXCollections.observableArrayList();
         try {
             String sql = "SELECT * FROM appointments";
             PreparedStatement ps = JDBC.connection.prepareStatement(sql);
             ResultSet rs = ps.executeQuery();
+            // Iterate over the ResultSet and create Appointments objects.
             while (rs.next()) {
                 int appointmentId = rs.getInt("Appointment_ID");
                 String title = rs.getString("Title");
@@ -40,7 +49,11 @@ public abstract class AppointmentData {
         return appointmentList;
     }
 
-    //------ Add New Appointment ------
+    /**
+     * Adds a new appointment to the database.
+     *
+     * @param appointment the Appointments object containing the data to be stored
+     */
     public static void addAppointment(Appointments appointment) {
         try {
             String sql = "INSERT INTO appointments (Appointment_ID, Title, Description, Location, Type, Start, End, Customer_ID, User_ID, Contact_ID) " +
@@ -62,7 +75,11 @@ public abstract class AppointmentData {
         }
     }
 
-    //------ Update Appointment ------
+    /**
+     * Updates an existing appointment in the database.
+     *
+     * @param updatedAppointment the Appointments object containing updated data
+     */
     public static void updateAppointment(Appointments updatedAppointment) {
         try {
             String sql = "UPDATE appointments SET Title = ?, Description = ?, Location = ?, Type = ?, Start = ?, End = ?, Customer_ID = ?, User_ID = ?, Contact_ID = ? " +
@@ -84,7 +101,11 @@ public abstract class AppointmentData {
         }
     }
 
-    //------ Delete Appointment ------
+    /**
+     * Deletes an appointment from the database.
+     *
+     * @param appointmentId the ID of the appointment to delete
+     */
     public static void deleteAppointment(int appointmentId) {
         try {
             String sql = "DELETE FROM appointments WHERE Appointment_ID = ?";
