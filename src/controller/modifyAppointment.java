@@ -25,8 +25,10 @@ import java.util.ResourceBundle;
 
 /**
  * Controller for modifying an appointment.
+ * <p>
  * Provides methods to populate the form with existing appointment data, validate and save modifications,
  * and return to the main page.
+ * </p>
  */
 public class modifyAppointment implements Initializable {
 
@@ -45,21 +47,21 @@ public class modifyAppointment implements Initializable {
     @FXML private ComboBox<Contacts> apptContactID;
     @FXML private Button modifyApptSave;
     @FXML private Button modifyApptCancel;
+
     private Appointments selectedAppointment;
 
     /**
      * Initializes the modify appointment form.
      * <p>
      * Sets up the time ChoiceBoxes and the Contacts, Customers, and Users ComboBoxes.
-     *
      * Lambda expressions used:
      * <ul>
-     *   <li>In populateTimeChoiceBox: loops adding LocalTime objects to the ChoiceBox.</li>
-     *   <li>In setupComboBoxForContacts: converter lambda converts a Contacts object to String,
+     *   <li>In {@code populateTimeChoiceBox}: loops adding LocalTime objects to the ChoiceBox.</li>
+     *   <li>In {@code setupComboBoxForContacts}: converter lambda converts a Contacts object to String,
      *       and cell factory lambda creates a ListCell to display contact details.</li>
-     *   <li>In setupComboBoxForCustomers: converter lambda converts a Customers object to String,
+     *   <li>In {@code setupComboBoxForCustomers}: converter lambda converts a Customers object to String,
      *       and cell factory lambda creates a ListCell to display customer details.</li>
-     *   <li>In setupComboBoxForUsers: converter lambda converts a Users object to String,
+     *   <li>In {@code setupComboBoxForUsers}: converter lambda converts a Users object to String,
      *       and cell factory lambda creates a ListCell to display user details.</li>
      * </ul>
      * </p>
@@ -109,12 +111,13 @@ public class modifyAppointment implements Initializable {
 
     /**
      * Sets up the Contacts ComboBox with a converter and custom cell factory.
-     *
-     * Lambda expressions used:
+     * <p>
+     * Lambda expressions:
      * <ul>
      *   <li>Converter lambda: converts a Contacts object to its string representation.</li>
      *   <li>Cell factory lambda: creates a ListCell to display contact name and ID.</li>
      * </ul>
+     * </p>
      *
      * @param comboBox the ComboBox to set up
      */
@@ -133,6 +136,7 @@ public class modifyAppointment implements Initializable {
             @Override
             protected void updateItem(Contacts contact, boolean empty) {
                 super.updateItem(contact, empty);
+                // Lambda: Display contact name and ID
                 setText(empty || contact == null ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")");
             }
         });
@@ -140,12 +144,13 @@ public class modifyAppointment implements Initializable {
 
     /**
      * Sets up the Customers ComboBox with a converter and custom cell factory.
-     *
-     * Lambda expressions used:
+     * <p>
+     * Lambda expressions:
      * <ul>
      *   <li>Converter lambda: converts a Customers object to its string representation.</li>
      *   <li>Cell factory lambda: creates a ListCell to display customer name and ID.</li>
      * </ul>
+     * </p>
      *
      * @param comboBox the ComboBox to set up
      */
@@ -164,6 +169,7 @@ public class modifyAppointment implements Initializable {
             @Override
             protected void updateItem(Customers customer, boolean empty) {
                 super.updateItem(customer, empty);
+                // Lambda: Display customer name and ID
                 setText(empty || customer == null ? "" : customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
             }
         });
@@ -171,12 +177,13 @@ public class modifyAppointment implements Initializable {
 
     /**
      * Sets up the Users ComboBox with a converter and custom cell factory.
-     *
-     * Lambda expressions used:
+     * <p>
+     * Lambda expressions:
      * <ul>
      *   <li>Converter lambda: converts a Users object to its string representation.</li>
      *   <li>Cell factory lambda: creates a ListCell to display user name and ID.</li>
      * </ul>
+     * </p>
      *
      * @param comboBox the ComboBox to set up
      */
@@ -195,6 +202,7 @@ public class modifyAppointment implements Initializable {
             @Override
             protected void updateItem(Users user, boolean empty) {
                 super.updateItem(user, empty);
+                // Lambda: Display user name and ID
                 setText(empty || user == null ? "" : user.getUserName() + " (ID: " + user.getUserId() + ")");
             }
         });
@@ -245,16 +253,16 @@ public class modifyAppointment implements Initializable {
     /**
      * Saves the modified appointment.
      * <p>
-     * Validates input fields, ensures end time is after start time,
-     * checks business hours (8 AM - 10 PM ET) and overlapping appointments,
-     * then updates the appointment in the database and returns to the main page.
+     * Validates input fields, ensures end time is after start time, checks business hours (8 AM - 10 PM ET),
+     * verifies that the appointment is scheduled on a weekday (not on weekends), and checks for overlapping appointments.
+     * If valid, updates the appointment in the database and returns to the main page.
      * </p>
      *
      * @param event the ActionEvent triggered by clicking the Save button
      */
     @FXML
     private void ModifyApptSaveAction(ActionEvent event) {
-        // Validate fields.
+        // Validate required fields.
         if (apptTitle.getText().isEmpty() ||
                 apptDescription.getText().isEmpty() ||
                 apptLocation.getText().isEmpty() ||
@@ -274,13 +282,14 @@ public class modifyAppointment implements Initializable {
             return;
         }
         try {
-            // Combine date/time values.
+            // Combine date and time values.
             LocalDate startDate = apptStartDate.getValue();
             LocalTime startTime = apptStartTime.getValue();
             LocalDate endDate = apptEndDate.getValue();
             LocalTime endTime = apptEndTime.getValue();
             LocalDateTime startDateTime = startDate.atTime(startTime);
             LocalDateTime endDateTime = endDate.atTime(endTime);
+
             // Validate that end time is after start time.
             if (!endDateTime.isAfter(startDateTime)) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -290,7 +299,17 @@ public class modifyAppointment implements Initializable {
                 alert.showAndWait();
                 return;
             }
-            // Business hours validation (8 AM - 10 PM ET).
+            // Validate appointment is not scheduled on weekends.
+            if (startDate.getDayOfWeek() == DayOfWeek.SATURDAY || startDate.getDayOfWeek() == DayOfWeek.SUNDAY ||
+                    endDate.getDayOfWeek() == DayOfWeek.SATURDAY || endDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Weekend Appointment");
+                alert.setHeaderText("Appointments cannot be scheduled on weekends");
+                alert.setContentText("Please select a weekday for the appointment.");
+                alert.showAndWait();
+                return;
+            }
+            // Business hours validation (8:00 AM - 10:00 PM ET).
             ZoneId easternZone = ZoneId.of("America/New_York");
             ZonedDateTime startEastern = startDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
             ZonedDateTime endEastern = endDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);

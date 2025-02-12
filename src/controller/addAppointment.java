@@ -147,9 +147,10 @@ public class addAppointment implements Initializable {
     /**
      * Handles the Save button action to add a new appointment.
      * <p>
-     * Validates that all required fields are completed, ensures the appointment end time is after the start time,
-     * validates business hours (8:00 AM to 10:00 PM Eastern Time), checks for overlapping appointments,
-     * creates a new appointment, saves it to the database, and returns to the main page.
+     * Validates that all required fields are filled, ensures the appointment end time is after the start time,
+     * validates that the appointment is not scheduled on a weekend, checks that the appointment is within business hours
+     * (8:00 AM to 10:00 PM Eastern Time), checks for overlapping appointments for the same customer, creates a new appointment,
+     * saves it to the database, and returns to the main page.
      * </p>
      *
      * @param event the ActionEvent triggered by clicking the Save button
@@ -189,6 +190,16 @@ public class addAppointment implements Initializable {
                 alert.setTitle("Invalid Appointment Time");
                 alert.setHeaderText("End time must be after start time");
                 alert.setContentText("Please enter an end date/time that is later than the start date/time.");
+                alert.showAndWait();
+                return;
+            }
+            // Validate that the appointment is not scheduled on weekends
+            if (startDate.getDayOfWeek() == DayOfWeek.SATURDAY || startDate.getDayOfWeek() == DayOfWeek.SUNDAY ||
+                    endDate.getDayOfWeek() == DayOfWeek.SATURDAY || endDate.getDayOfWeek() == DayOfWeek.SUNDAY) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Weekend Appointment");
+                alert.setHeaderText("Appointments cannot be scheduled on weekends");
+                alert.setContentText("Please select a weekday for the appointment.");
                 alert.showAndWait();
                 return;
             }

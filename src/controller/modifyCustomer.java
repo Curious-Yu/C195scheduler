@@ -44,12 +44,13 @@ public class modifyCustomer implements Initializable {
     @FXML public ComboBox<FirstLevelDivisions> customerDivision;
     @FXML public Button modifyCustomerSave;
     @FXML public Button modifyCustomerCancel;
+
     private Customers selectedCustomer;
 
     /**
      * Initializes the modify customer form by setting up the country and division ComboBoxes.
      * <p>
-     * The following lambda expressions are used:
+     * Lambda expressions used:
      * <ul>
      *   <li>In customerCountry.setConverter: converts a Countries object to its String representation.</li>
      *   <li>In customerCountry.setCellFactory: creates a custom ListCell for Countries.</li>
@@ -85,9 +86,11 @@ public class modifyCustomer implements Initializable {
             @Override
             protected void updateItem(Countries country, boolean empty) {
                 super.updateItem(country, empty);
+                // Lambda: Display country name
                 setText(empty || country == null ? "" : country.getCountry());
             }
         });
+
         //------ Initialize Division ComboBox ------
         customerDivision.setItems(FXCollections.observableArrayList());
         customerDivision.setConverter(new StringConverter<FirstLevelDivisions>() {
@@ -104,6 +107,7 @@ public class modifyCustomer implements Initializable {
             @Override
             protected void updateItem(FirstLevelDivisions division, boolean empty) {
                 super.updateItem(division, empty);
+                // Lambda: Display division name
                 setText(empty || division == null ? "" : division.getDivision());
             }
         });
@@ -213,15 +217,46 @@ public class modifyCustomer implements Initializable {
 
     /**
      * Handles the country dropdown event.
+     * <p>
+     * When a new country is selected, clears the division selection and re-populates the division ComboBox
+     * with divisions that belong to the selected country. If no country is selected, the division ComboBox is cleared.
+     * </p>
+     *
+     * @param actionEvent the ActionEvent triggered by selecting a country
      */
     public void customerCountryDropdown(ActionEvent actionEvent) {
-        // Additional logic can be added here if needed.
+        Countries selectedCountry = customerCountry.getValue();
+        if (selectedCountry != null) {
+            try {
+                ObservableList<FirstLevelDivisions> divisionsForCountry = FXCollections.observableArrayList();
+                divisionsForCountry.addAll(FirstLevelDivisionData.getDivisionsByCountryId(selectedCountry.getCountryId()));
+                customerDivision.setItems(divisionsForCountry);
+                // Clear any previously selected division.
+                customerDivision.setValue(null);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Error Loading Divisions");
+                alert.setHeaderText("An error occurred");
+                alert.setContentText("Unable to load divisions for the selected country.");
+                alert.showAndWait();
+            }
+        } else {
+            // Clear divisions if no country is selected.
+            customerDivision.setItems(FXCollections.observableArrayList());
+            customerDivision.setValue(null);
+        }
     }
 
     /**
      * Handles the division dropdown event.
+     * <p>
+     * Additional logic can be added here if needed when a division is selected.
+     * </p>
+     *
+     * @param actionEvent the ActionEvent triggered by selecting a division
      */
     public void customerDivisionDropdown(ActionEvent actionEvent) {
-        // Additional logic can be added here if needed.
+        // No additional logic implemented.
     }
 }
