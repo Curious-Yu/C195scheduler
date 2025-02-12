@@ -303,7 +303,22 @@ public class mainpage {
 
     @FXML
     private void reportsActionButton(ActionEvent event) {
-        // Logic for generating reports.
+        try {
+            // Load the report.fxml file.
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/report.fxml"));
+            Parent root = loader.load();
+            // Get the current stage from the event source.
+            Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
+            // Replace the current scene's root with the report view.
+            stage.getScene().setRoot(root);
+        } catch (IOException e) {
+            e.printStackTrace();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error Loading Reports");
+            alert.setHeaderText("An error occurred");
+            alert.setContentText("Unable to load the reports view. Please try again.");
+            alert.showAndWait();
+        }
     }
 
     @FXML
@@ -435,22 +450,30 @@ public class mainpage {
      * If no appointments are upcoming within 15 minutes, displays a custom message.
      */
     private void checkUpcomingAppointments() {
+        // Get the current UTC time.
         LocalDateTime now = LocalDateTime.now();
-        LocalDateTime threshold = now.plusMinutes(15);
+        // Define the threshold as 15 minutes from now.
+        LocalDateTime thresholdUtc = now.plusMinutes(15);
+
+        // Retrieve all appointments from the database.
         ObservableList<Appointments> appointments = AppointmentData.getAllAppointments();
         StringBuilder alertMsg = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
+        // Iterate through all appointments.
         for (Appointments appt : appointments) {
-            // Use local conversion to display times in user's time zone.
-            LocalDateTime apptStart = appt.getLocalStartDateTime();
-            if (apptStart.isAfter(now) && apptStart.isBefore(threshold)) {
+            // Get the appointment start time directly from the database
+            LocalDateTime apptStart = appt.getStartDateTime();
+
+            // Check if the appointment starts between now (inclusive) and 15 minutes later.
+            if ((apptStart.isEqual(now) || apptStart.isAfter(now)) && apptStart.isBefore(thresholdUtc)) {
                 alertMsg.append("Appointment ID: ").append(appt.getAppointmentId())
                         .append(", Date & Time: ").append(apptStart.format(formatter))
                         .append("\n");
             }
         }
 
+        // Show the appropriate alert.
         if (alertMsg.length() > 0) {
             Alert upcomingAlert = new Alert(Alert.AlertType.INFORMATION);
             upcomingAlert.setTitle("Upcoming Appointment(s)");

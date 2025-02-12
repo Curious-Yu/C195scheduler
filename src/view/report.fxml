@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.AnchorPane?>
+<?import javafx.scene.text.Font?>
+
+<AnchorPane prefHeight="802.0" prefWidth="1076.0" style="-fx-background-color: darkseagreen;" xmlns="http://javafx.com/javafx/17" xmlns:fx="http://javafx.com/fxml/1" fx:controller="controller.report">
+    <children>
+        <TableView fx:id="contactReportTable" layoutX="23.0" layoutY="131.0" prefHeight="325.0" prefWidth="1031.0">
+            <columns>
+                <TableColumn fx:id="reportApptID" prefWidth="129.0" text="Appointment ID" />
+                <TableColumn fx:id="reportApptTitle" prefWidth="86.0" text="Title" />
+                <TableColumn fx:id="reportApptType" prefWidth="92.0" text="Type" />
+                <TableColumn fx:id="reportApptDescription" prefWidth="113.0" text="Description" />
+                <TableColumn fx:id="reportApptAddress" minWidth="0.0" prefWidth="162.0" text="Address" />
+                <TableColumn fx:id="reportApptStart" prefWidth="156.0" text="Start" />
+                <TableColumn fx:id="reportApptEnd" prefWidth="175.0" text="End" />
+                <TableColumn fx:id="reportApptCustomerID" prefWidth="102.0" text="Customer ID" />
+            </columns>
+        </TableView>
+        <TableView fx:id="customerTypeMonthReportTable" layoutX="23.0" layoutY="510.0" prefHeight="180.0" prefWidth="514.0">
+            <columns>
+                <TableColumn fx:id="reportCustomerApptMonth" prefWidth="156.0" text="Appointment Month" />
+                <TableColumn fx:id="reportCustomerApptType" prefWidth="166.0" text="Appointment Type" />
+                <TableColumn fx:id="reportCustomerApptCount" prefWidth="185.0" text="Customer Appointment Count" />
+            </columns>
+        </TableView>
+        <TableView fx:id="apptLocationReportTable" layoutX="567.0" layoutY="510.0" prefHeight="180.0" prefWidth="488.0">
+            <columns>
+                <TableColumn fx:id="reportApptCountry" prefWidth="141.0" text="Country" />
+            <TableColumn fx:id="reportApptStateProvince" prefWidth="169.0" text="State / Province" />
+                <TableColumn fx:id="reportApptCount" prefWidth="170.0" text="Customer Count" />
+            </columns>
+        </TableView>
+        <ComboBox fx:id="reportContact" layoutX="280.0" layoutY="86.0" onAction="#reportContactDropdown" prefHeight="25.0" prefWidth="233.0" promptText="Select a Contact" />
+      <Label layoutX="453.0" layoutY="24.0" text="Reports">
+         <font>
+            <Font size="36.0" />
+         </font>
+      </Label>
+      <Label layoutX="23.0" layoutY="85.0" text="Schedule Report for Contacts">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="23.0" layoutY="475.0" text="Customer Appointment Count by Type and Month">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Label layoutX="567.0" layoutY="475.0" text="Appointment Count by Location">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Label>
+      <Button fx:id="reportBack" layoutX="452.0" layoutY="726.0" mnemonicParsing="false" onAction="#reportBackButton" prefWidth="125.0" text="Back">
+         <font>
+            <Font size="18.0" />
+         </font>
+      </Button>
+    </children>
+</AnchorPane>
