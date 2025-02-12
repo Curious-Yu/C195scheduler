@@ -11,14 +11,16 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import model.Countries;
 import model.Customers;
 import model.FirstLevelDivisions;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
@@ -26,8 +28,8 @@ import java.util.ResourceBundle;
 
 public class addCustomer implements Initializable {
 
-    // FXML fields mapped from the addCustomer.fxml file.
-    @FXML private TextField customerID;           // Disabled; auto-generated.
+    //------ FXML Fields ------
+    @FXML private TextField customerID;           // Auto-generated
     @FXML private TextField customerFirstName;
     @FXML private TextField customerLastName;
     @FXML private TextField customerAddress;
@@ -38,16 +40,15 @@ public class addCustomer implements Initializable {
     @FXML private Button addCustomerSave;
     @FXML private Button addCustomerCancel;
 
-    // ObservableLists to store loaded countries and divisions.
+    //------ ObservableList for Countries ------
     private ObservableList<Countries> countriesList;
-    // No need to keep a global divisions list; we'll load divisions per country.
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Set the customerID field as auto-generated.
+        //------ Set Customer ID as Auto-Gen ------
         customerID.setText("Auto-Gen");
 
-        // Load countries into the customerCountry ComboBox.
+        //------ Load Countries ------
         countriesList = CountryData.getAllCountries();
         customerCountry.setItems(countriesList);
         customerCountry.setConverter(new StringConverter<Countries>() {
@@ -68,7 +69,7 @@ public class addCustomer implements Initializable {
             }
         });
 
-        // Initially, clear the divisions ComboBox. It will be populated when a country is selected.
+        //------ Clear Divisions ComboBox ------
         customerDivision.setItems(FXCollections.observableArrayList());
         customerDivision.setConverter(new StringConverter<FirstLevelDivisions>() {
             @Override
@@ -89,14 +90,10 @@ public class addCustomer implements Initializable {
         });
     }
 
-    /**
-     * Event handler for the Save button.
-     * Validates input, creates a new Customers object, saves it via CustomerData,
-     * and then returns to the main page in the same window.
-     */
+    //------ Save Customer ------
     @FXML
     private void addCustomerSaveButton(ActionEvent event) {
-        // Validate that all required fields are filled.
+        // Validate fields
         if (customerFirstName.getText().isEmpty() ||
                 customerLastName.getText().isEmpty() ||
                 customerAddress.getText().isEmpty() ||
@@ -112,28 +109,24 @@ public class addCustomer implements Initializable {
             return;
         }
 
-        // Create the customer name by combining first and last names.
+        // Combine first and last names
         String customerName = customerFirstName.getText().trim() + " " + customerLastName.getText().trim();
         String address = customerAddress.getText().trim();
         String postalCode = customerPostalCode.getText().trim();
         String phone = customerPhoneNumber.getText().trim();
         int divisionId = customerDivision.getValue().getDivisionId();
 
-        // Create a new Customers object.
-        // public Customers(int customerId, String customerName, String address, String postalCode, String phone, int divisionId)
+        // Create new customer and save
         Customers newCustomer = new Customers(0, customerName, address, postalCode, phone, divisionId);
-
-        // Save the customer to the database.
         CustomerData.addCustomer(newCustomer);
 
-        // Show success message.
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
         successAlert.setTitle("Customer Added");
         successAlert.setHeaderText(null);
         successAlert.setContentText("The customer was successfully added.");
         successAlert.showAndWait();
 
-        // Return to the main page in the same window.
+        // Return to main page
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
@@ -149,10 +142,7 @@ public class addCustomer implements Initializable {
         }
     }
 
-    /**
-     * Event handler for the Cancel button.
-     * Returns to the main page in the same window without saving.
-     */
+    //------ Cancel and return to main page ------
     @FXML
     private void addCustomerCancelButton(ActionEvent event) {
         try {
@@ -170,16 +160,12 @@ public class addCustomer implements Initializable {
         }
     }
 
-    /**
-     * Event handler for when a country is selected from the customerCountry ComboBox.
-     * This method populates the customerDivision ComboBox with divisions that belong to the selected country.
-     */
+    //------ Load Divisions when a Country is selected ------
     @FXML
     private void customerCountryDropdown(ActionEvent event) {
         Countries selectedCountry = customerCountry.getValue();
         if (selectedCountry != null) {
             try {
-                // Retrieve divisions for the selected country.
                 ObservableList<FirstLevelDivisions> divisionsForCountry = FXCollections.observableArrayList();
                 divisionsForCountry.addAll(FirstLevelDivisionData.getDivisionsByCountryId(selectedCountry.getCountryId()));
                 customerDivision.setItems(divisionsForCountry);
@@ -196,6 +182,6 @@ public class addCustomer implements Initializable {
 
     @FXML
     private void customerDivisionDropdown(ActionEvent event) {
-        // Already embedded in the Country dropdown menu. Additional logic can be added here if needed when a division is selected.
+        // Additional logic can be added here if needed.
     }
 }

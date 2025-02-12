@@ -14,7 +14,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.stage.Stage;
@@ -23,7 +22,6 @@ import model.Appointments;
 import model.Contacts;
 import model.Countries;
 import model.FirstLevelDivisions;
-
 import java.io.IOException;
 import java.net.URL;
 import java.time.LocalDate;
@@ -36,7 +34,7 @@ import java.util.stream.Collectors;
 
 public class report implements Initializable {
 
-    // ***************** Contact Report *****************
+    //------ Contact Report ------
     @FXML private TableView<Appointments> contactReportTable;
     @FXML private TableColumn<Appointments, String> reportApptID;
     @FXML private TableColumn<Appointments, String> reportApptTitle;
@@ -48,13 +46,13 @@ public class report implements Initializable {
     @FXML private TableColumn<Appointments, String> reportApptCustomerID;
     @FXML private ComboBox<Contacts> reportContact;
 
-    // ********* Customer Appointment Count by Type and Month Report *********
+    //------ Appointment Count by Type and Month Report ------
     @FXML private TableView<CustomerApptReport> customerTypeMonthReportTable;
     @FXML private TableColumn<CustomerApptReport, String> reportCustomerApptMonth;
     @FXML private TableColumn<CustomerApptReport, String> reportCustomerApptType;
     @FXML private TableColumn<CustomerApptReport, Long> reportCustomerApptCount;
 
-    // ********* Appointment Location Report *********
+    //------ Appointment Location Report ------
     @FXML private TableView<CustomerLocationReport> apptLocationReportTable;
     @FXML private TableColumn<CustomerLocationReport, String> reportApptCountry;
     @FXML private TableColumn<CustomerLocationReport, String> reportApptStateProvince;
@@ -62,7 +60,7 @@ public class report implements Initializable {
 
     @FXML private Button reportBack;
 
-    // Inner class for Customer Appointment Count by Type and Month Report.
+    //------ Inner class: Appointment Count Report ------
     public static class CustomerApptReport {
         private final String appointmentMonth;
         private final String appointmentType;
@@ -87,7 +85,7 @@ public class report implements Initializable {
         }
     }
 
-    // Inner class for Appointment Location Report.
+    //------ Inner class: Appointment Location Report ------
     public static class CustomerLocationReport {
         private final String country;
         private final String state;
@@ -114,16 +112,24 @@ public class report implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // ------------------ Contact Report Setup ------------------
+        //------ Contact Report Setup ------
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        reportApptID.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getAppointmentId())));
-        reportApptTitle.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getTitle()));
-        reportApptType.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getType()));
-        reportApptDescription.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getDescription()));
-        reportApptAddress.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getLocation()));
-        reportApptStart.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
-        reportApptEnd.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
-        reportApptCustomerID.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
+        reportApptID.setCellValueFactory(cellData ->
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getAppointmentId())));
+        reportApptTitle.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getTitle()));
+        reportApptType.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getType()));
+        reportApptDescription.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getDescription()));
+        reportApptAddress.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getLocation()));
+        reportApptStart.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
+        reportApptEnd.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
+        reportApptCustomerID.setCellValueFactory(cellData ->
+                new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
         contactReportTable.setItems(AppointmentData.getAllAppointments());
 
         reportContact.setItems(ContactData.getAllContacts());
@@ -145,7 +151,7 @@ public class report implements Initializable {
             }
         });
 
-        // ------------------ Customer Appointment Count by Type and Month Report Setup ------------------
+        //------ Appointment Count by Type and Month Setup ------
         reportCustomerApptMonth.setCellValueFactory(new PropertyValueFactory<>("appointmentMonth"));
         reportCustomerApptType.setCellValueFactory(new PropertyValueFactory<>("appointmentType"));
         reportCustomerApptCount.setCellValueFactory(new PropertyValueFactory<>("appointmentCount"));
@@ -154,12 +160,8 @@ public class report implements Initializable {
         Map<String, Map<String, Long>> groupedData = AppointmentData.getAllAppointments().stream()
                 .collect(Collectors.groupingBy(
                         appt -> appt.getStartDateTime().format(monthFormatter),
-                        Collectors.groupingBy(
-                                Appointments::getType,
-                                Collectors.counting()
-                        )
+                        Collectors.groupingBy(Appointments::getType, Collectors.counting())
                 ));
-
         DateTimeFormatter parseFormatter = DateTimeFormatter.ofPattern("dd MMMM yyyy");
         List<String> sortedMonths = groupedData.keySet().stream()
                 .sorted((m1, m2) -> {
@@ -173,7 +175,6 @@ public class report implements Initializable {
                     }
                 })
                 .collect(Collectors.toList());
-
         ObservableList<CustomerApptReport> apptReportData = FXCollections.observableArrayList();
         for (String month : sortedMonths) {
             Map<String, Long> typeMap = groupedData.get(month);
@@ -183,7 +184,7 @@ public class report implements Initializable {
         }
         customerTypeMonthReportTable.setItems(apptReportData);
 
-        // ------------------ Appointment Location Report Setup ------------------
+        //------ Appointment Location Report Setup ------
         reportApptCountry.setCellValueFactory(new PropertyValueFactory<>("country"));
         reportApptStateProvince.setCellValueFactory(new PropertyValueFactory<>("state"));
         reportApptCount.setCellValueFactory(new PropertyValueFactory<>("count"));
@@ -217,22 +218,20 @@ public class report implements Initializable {
                 },
                 Collectors.counting()
         ));
-
         locationGrouping.forEach((key, count) -> {
             String[] parts = key.split(" - ");
             String country = parts.length > 0 ? parts[0] : "N/A";
             String state = parts.length > 1 ? parts[1] : "N/A";
             locationReports.add(new CustomerLocationReport(country, state, count));
         });
-
         locationReports.sort((r1, r2) -> {
             int cmp = r1.getCountry().compareTo(r2.getCountry());
             return (cmp == 0) ? r1.getState().compareTo(r2.getState()) : cmp;
         });
         apptLocationReportTable.setItems(locationReports);
 
-        // ------------------ Back Button and Other Initialization ------------------
-        // (Other initialization code such as setting the current time zone, loading additional data, etc.)
+        //------ Back Button Setup ------
+        // (Additional initialization as needed)
     }
 
     @FXML

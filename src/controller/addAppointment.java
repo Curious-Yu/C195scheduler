@@ -7,7 +7,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ChoiceBox;
@@ -25,15 +24,15 @@ import helper.AppointmentData;
 import helper.ContactData;
 import helper.CustomerData;
 import helper.UsersData;
-
 import java.net.URL;
 import java.time.*;
+import java.time.format.DateTimeFormatter;
 import java.util.ResourceBundle;
 
 public class addAppointment implements Initializable {
 
-    // FXML fields mapped from the addAppointment.fxml file
-    @FXML private TextField apptID;           // Disabled; auto-generated.
+    //------ FXML Fields ------
+    @FXML private TextField apptID; // Auto-generated
     @FXML private TextField apptTitle;
     @FXML private TextField apptDescription;
     @FXML private TextField apptLocation;
@@ -42,7 +41,6 @@ public class addAppointment implements Initializable {
     @FXML private ChoiceBox<String> apptStartTime;
     @FXML private DatePicker apptEndDate;
     @FXML private ChoiceBox<String> apptEndTime;
-    // Use ComboBox with model objects for meaningful display.
     @FXML private ComboBox<Contacts> apptContactID;
     @FXML private ComboBox<Customers> apptCustomerID;
     @FXML private ComboBox<Users> apptUserID;
@@ -51,7 +49,7 @@ public class addAppointment implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Populate the start and end time ChoiceBoxes with times in 5-minute increments (00:00 to 23:55)
+        //------ Populate Time ChoiceBoxes ------
         apptStartTime.getItems().clear();
         apptEndTime.getItems().clear();
         for (int hour = 0; hour < 24; hour++) {
@@ -62,105 +60,74 @@ public class addAppointment implements Initializable {
             }
         }
 
-        // Populate the contacts ComboBox from the database.
+        //------ Set up Contacts ComboBox ------
         apptContactID.setItems(ContactData.getAllContacts());
         apptContactID.setConverter(new StringConverter<Contacts>() {
             @Override
             public String toString(Contacts contact) {
-                if (contact == null) {
-                    return "";
-                }
-                return contact.getContactName() + " (ID: " + contact.getContactId() + ")";
+                return (contact == null) ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")";
             }
             @Override
             public Contacts fromString(String string) {
-                return null; // Not needed.
+                return null;
             }
         });
-        apptContactID.setCellFactory((comboBox) -> {
-            return new ListCell<Contacts>() {
-                @Override
-                protected void updateItem(Contacts contact, boolean empty) {
-                    super.updateItem(contact, empty);
-                    if (empty || contact == null) {
-                        setText("");
-                    } else {
-                        setText(contact.getContactName() + " (ID: " + contact.getContactId() + ")");
-                    }
-                }
-            };
+        apptContactID.setCellFactory(comboBox -> new ListCell<Contacts>() {
+            @Override
+            protected void updateItem(Contacts contact, boolean empty) {
+                super.updateItem(contact, empty);
+                setText(empty || contact == null ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")");
+            }
         });
 
-        // Populate the customer ComboBox with data from the database.
+        //------ Set up Customers ComboBox ------
         apptCustomerID.setItems(CustomerData.getAllCustomers());
         apptCustomerID.setConverter(new StringConverter<Customers>() {
             @Override
             public String toString(Customers customer) {
-                if (customer == null) {
-                    return "";
-                }
-                return customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")";
+                return (customer == null) ? "" : customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")";
             }
             @Override
             public Customers fromString(String string) {
-                return null; // Not needed.
+                return null;
             }
         });
-        apptCustomerID.setCellFactory((comboBox) -> {
-            return new ListCell<Customers>() {
-                @Override
-                protected void updateItem(Customers customer, boolean empty) {
-                    super.updateItem(customer, empty);
-                    if (empty || customer == null) {
-                        setText("");
-                    } else {
-                        setText(customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
-                    }
-                }
-            };
+        apptCustomerID.setCellFactory(comboBox -> new ListCell<Customers>() {
+            @Override
+            protected void updateItem(Customers customer, boolean empty) {
+                super.updateItem(customer, empty);
+                setText(empty || customer == null ? "" : customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
+            }
         });
 
-        // Populate the user ComboBox with data from the database.
+        //------ Set up Users ComboBox ------
         apptUserID.setItems(UsersData.getAllUsers());
         apptUserID.setConverter(new StringConverter<Users>() {
             @Override
             public String toString(Users user) {
-                if (user == null) {
-                    return "";
-                }
-                return user.getUserName() + " (ID: " + user.getUserId() + ")";
+                return (user == null) ? "" : user.getUserName() + " (ID: " + user.getUserId() + ")";
             }
             @Override
             public Users fromString(String string) {
-                return null; // Not needed.
+                return null;
             }
         });
-        apptUserID.setCellFactory((comboBox) -> {
-            return new ListCell<Users>() {
-                @Override
-                protected void updateItem(Users user, boolean empty) {
-                    super.updateItem(user, empty);
-                    if (empty || user == null) {
-                        setText("");
-                    } else {
-                        setText(user.getUserName() + " (ID: " + user.getUserId() + ")");
-                    }
-                }
-            };
+        apptUserID.setCellFactory(comboBox -> new ListCell<Users>() {
+            @Override
+            protected void updateItem(Users user, boolean empty) {
+                super.updateItem(user, empty);
+                setText(empty || user == null ? "" : user.getUserName() + " (ID: " + user.getUserId() + ")");
+            }
         });
 
-        // Set the Appointment ID field; since it's auto-generated, display "Auto-Gen".
+        //------ Set Appointment ID ------
         apptID.setText("Auto-Gen");
     }
 
-    /**
-     * Event handler for the Save button.
-     * Validates input, creates a new Appointment object, saves it via AppointmentData,
-     * and then returns to the main page by replacing the current scene's root.
-     */
+    //------ Save Appointment ------
     @FXML
     private void AddApptSaveAction(ActionEvent event) {
-        // Validate that all required fields are completed.
+        // Validate required fields
         if (apptTitle.getText().isEmpty() ||
                 apptDescription.getText().isEmpty() ||
                 apptLocation.getText().isEmpty() ||
@@ -181,7 +148,7 @@ public class addAppointment implements Initializable {
         }
 
         try {
-            // Combine DatePicker and ChoiceBox values to create LocalDateTime for the Start and End fields.
+            // Combine date and time values
             LocalDate startDate = apptStartDate.getValue();
             LocalDate endDate = apptEndDate.getValue();
             LocalTime startTime = LocalTime.parse(apptStartTime.getValue());
@@ -189,17 +156,22 @@ public class addAppointment implements Initializable {
             LocalDateTime startDateTime = startDate.atTime(startTime);
             LocalDateTime endDateTime = endDate.atTime(endTime);
 
-            // --- BUSINESS HOURS VALIDATION ---
-            // Business hours: 8:00 AM to 10:00 PM Eastern Time (ET)
+            // Validate end time is after start time
+            if (!endDateTime.isAfter(startDateTime)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Appointment Time");
+                alert.setHeaderText("End time must be after start time");
+                alert.setContentText("Please enter an end date/time that is later than the start date/time.");
+                alert.showAndWait();
+                return;
+            }
+
+            // Business hours validation (8:00 AM - 10:00 PM ET)
             ZoneId easternZone = ZoneId.of("America/New_York");
-            // Convert the entered local times to Eastern Time.
             ZonedDateTime startEastern = startDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
             ZonedDateTime endEastern = endDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
-
-            LocalTime businessStart = LocalTime.of(8, 0);  // 8:00 AM ET
-            LocalTime businessEnd = LocalTime.of(22, 0);   // 10:00 PM ET
-
-            // Check that the start time is not before business start and end time is not after business end.
+            LocalTime businessStart = LocalTime.of(8, 0);
+            LocalTime businessEnd = LocalTime.of(22, 0);
             if (startEastern.toLocalTime().isBefore(businessStart) || endEastern.toLocalTime().isAfter(businessEnd)) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Outside Business Hours");
@@ -209,19 +181,16 @@ public class addAppointment implements Initializable {
                 return;
             }
 
-            // --- OVERLAPPING APPOINTMENT VALIDATION ---
-            // Check if the new appointment overlaps with any existing appointment for the same customer.
+            // Overlapping appointment validation
             int customerID = apptCustomerID.getValue().getCustomerId();
             ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
             for (Appointments existingAppt : allAppointments) {
-                // Only check appointments for the same customer.
                 if (existingAppt.getCustomerId() == customerID) {
-                    // Overlap condition: newStart < existingEnd AND newEnd > existingStart.
                     if (startDateTime.isBefore(existingAppt.getEndDateTime()) &&
                             endDateTime.isAfter(existingAppt.getStartDateTime())) {
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Overlapping Appointment");
-                        alert.setHeaderText("Appointment Overlap Detected");
+                        alert.setHeaderText("Appointment overlap detected");
                         alert.setContentText("The new appointment overlaps with an existing appointment for the selected customer.");
                         alert.showAndWait();
                         return;
@@ -229,7 +198,7 @@ public class addAppointment implements Initializable {
                 }
             }
 
-            // Retrieve text values for Title, Description, Location, and Type.
+            // Retrieve field values
             String title = apptTitle.getText();
             String description = apptDescription.getText();
             String location = apptLocation.getText();
@@ -237,31 +206,19 @@ public class addAppointment implements Initializable {
             int contactID = apptContactID.getValue().getContactId();
             int userID = apptUserID.getValue().getUserId();
 
-            // Create a new Appointment object.
+            // Create and save appointment
             Appointments newAppointment = new Appointments(
-                    0,             // Appointment ID (0 if auto-generated)
-                    title,         // Title
-                    description,   // Description
-                    location,      // Location
-                    type,          // Type
-                    startDateTime, // Start (as entered)
-                    endDateTime,   // End (as entered)
-                    customerID,    // Customer_ID
-                    userID,        // User_ID
-                    contactID      // Contact_ID
-            );
-
-            // Save the appointment to the database.
+                    0, title, description, location, type,
+                    startDateTime, endDateTime, customerID, userID, contactID);
             AppointmentData.addAppointment(newAppointment);
 
-            // Notify the user that the appointment was successfully added.
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Appointment Added");
             successAlert.setHeaderText(null);
             successAlert.setContentText("The appointment was successfully added.");
             successAlert.showAndWait();
 
-            // Return to the main page in the same window.
+            // Return to main page
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -276,10 +233,7 @@ public class addAppointment implements Initializable {
         }
     }
 
-    /**
-     * Event handler for the Cancel button.
-     * Returns to the main page (refreshing the appointment table) in the same window.
-     */
+    //------ Cancel and return to main page ------
     @FXML
     private void AddApptCancelAction(ActionEvent event) {
         try {

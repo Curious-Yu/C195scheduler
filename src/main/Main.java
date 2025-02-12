@@ -8,6 +8,8 @@ import javafx.scene.Scene;
 import javafx.stage.Stage;
 
 public class Main extends Application {
+
+    //------ Start Application ------
     @Override
     public void start(Stage stage) throws Exception {
         Parent root = FXMLLoader.load(getClass().getResource("/view/login.fxml"));
@@ -16,13 +18,11 @@ public class Main extends Application {
         stage.show();
     }
 
+    //------ Main Method ------
     public static void main(String[] args) {
         JDBC.openConnection();
+        System.out.println("Hello C195 Scheduler!");
         launch(args);
-
-        System.out.println("Hello project!");
-
         JDBC.closeConnection();
-
     }
 }

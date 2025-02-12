@@ -1,27 +1,25 @@
 package controller;
 
 import helper.CustomerData;
+import helper.CountryData;
+import helper.AppointmentData;
+import helper.JDBC;
+import helper.FirstLevelDivisionData;
 import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.collections.transformation.FilteredList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.beans.property.SimpleStringProperty;
-import javafx.collections.ObservableList;
 import javafx.stage.Stage;
 import model.Appointments;
 import model.Countries;
-import helper.CountryData;
 import model.Customers;
-import helper.AppointmentData;
-import helper.JDBC;
 import model.FirstLevelDivisions;
-import helper.FirstLevelDivisionData;
-
 import java.io.IOException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,10 +29,12 @@ import java.time.format.DateTimeFormatter;
 import java.util.Optional;
 
 public class mainpage {
-    // TableView for appointments and customers
+
+    //------ TableViews ------
     @FXML private TableView<Appointments> appointmentTable;
     @FXML private TableView<Customers> customerTable;
-    // Table Columns for Appointments
+
+    //------ Appointment Columns ------
     @FXML private TableColumn<Appointments, String> appointmentIDColumn;
     @FXML private TableColumn<Appointments, String> titleColumn;
     @FXML private TableColumn<Appointments, String> descriptionColumn;
@@ -45,7 +45,8 @@ public class mainpage {
     @FXML private TableColumn<Appointments, String> customerIdColumn;
     @FXML private TableColumn<Appointments, String> userIdColumn;
     @FXML private TableColumn<Appointments, String> contactIdColumn;
-    // Table Columns for Customers
+
+    //------ Customer Columns ------
     @FXML private TableColumn<Customers, String> customerIDColumn;
     @FXML private TableColumn<Customers, String> nameColumn;
     @FXML private TableColumn<Customers, String> addressColumn;
@@ -54,7 +55,8 @@ public class mainpage {
     @FXML private TableColumn<Customers, String> postalCodeColumn;
     @FXML private TableColumn<Customers, String> divisionIDColumn;
     @FXML private TableColumn<Customers, String> phoneColumn;
-    // Buttons
+
+    //------ Buttons ------
     @FXML private Button addAppointmentButton;
     @FXML private Button modifyAppointmentButton;
     @FXML private Button deleteAppointmentButton;
@@ -63,22 +65,24 @@ public class mainpage {
     @FXML private Button deleteCustomerButton;
     @FXML private Button exitButton;
     @FXML private Button reportsButton;
-    // Radio Buttons
+
+    //------ Radio Buttons & ToggleGroup ------
     @FXML private RadioButton allTimeRadio;
     @FXML private RadioButton currentMonthRadio;
     @FXML private RadioButton currentWeekRadio;
     @FXML private ToggleGroup appointmentToggle;
-    // TextField for Time Zone (displaying "UTC")
+
+    //------ Time Zone Display ------
     @FXML private TextField currentTimeZone;
 
-    // ------------------ Event Handlers ------------------
+    //------ Event Handlers ------
 
+    // Open addAppointment view
     @FXML
     private void addAppointmentActionButton(ActionEvent event) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/addAppointment.fxml"));
             Parent root = loader.load();
-            // Use the current stage; replace the scene's root.
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
@@ -86,6 +90,7 @@ public class mainpage {
         }
     }
 
+    // Open modifyAppointment view with selected appointment data
     @FXML
     private void modifyAppointmentActionButton(ActionEvent event) {
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
@@ -99,7 +104,6 @@ public class mainpage {
             try {
                 FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyAppointment.fxml"));
                 Parent root = loader.load();
-                // Pass the selected appointment to the modify controller.
                 modifyAppointment modController = loader.getController();
                 modController.initData(selectedAppointment);
                 Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
@@ -110,6 +114,7 @@ public class mainpage {
         }
     }
 
+    // Delete selected appointment
     @FXML
     private void deleteAppointmentActionButton(ActionEvent event) {
         Appointments selectedAppointment = appointmentTable.getSelectionModel().getSelectedItem();
@@ -121,7 +126,6 @@ public class mainpage {
             alert.showAndWait();
             return;
         }
-        // Format the UTC start and end times.
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
         String start = selectedAppointment.getStartDateTime().format(formatter);
         String end = selectedAppointment.getEndDateTime().format(formatter);
@@ -146,15 +150,13 @@ public class mainpage {
         }
     }
 
+    // Open addCustomer view
     @FXML
     private void addCustomerActionButton(ActionEvent event) {
         try {
-            // Load the addCustomer.fxml file.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/addCustomer.fxml"));
             Parent root = loader.load();
-            // Get the current stage from the event source.
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            // Replace the current scene's root with the add customer view.
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
@@ -166,12 +168,10 @@ public class mainpage {
         }
     }
 
+    // Open modifyCustomer view with selected customer data
     @FXML
     private void modifyCustomerActionButton(ActionEvent event) {
-        // Retrieve the selected customer from the customer table.
         Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
-
-        // If no customer is selected, show a warning and exit.
         if (selectedCustomer == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("No Customer Selected");
@@ -180,17 +180,11 @@ public class mainpage {
             alert.showAndWait();
             return;
         }
-
         try {
-            // Load the modifyCustomer.fxml file.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/modifyCustomer.fxml"));
             Parent root = loader.load();
-
-            // Get the modifyCustomer controller and pass the selected customer data.
             modifyCustomer modController = loader.getController();
             modController.setCustomerData(selectedCustomer);
-
-            // Get the current stage from the event source and replace the scene's root.
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(root);
         } catch (IOException e) {
@@ -203,9 +197,9 @@ public class mainpage {
         }
     }
 
+    // Delete customer and associated appointments
     @FXML
     private void deleteCustomerActionButton(ActionEvent event) {
-        // Retrieve the selected customer from the customer table.
         Customers selectedCustomer = customerTable.getSelectionModel().getSelectedItem();
         if (selectedCustomer == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
@@ -215,70 +209,49 @@ public class mainpage {
             alert.showAndWait();
             return;
         }
-
-        // Retrieve all appointments.
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
         StringBuilder appointmentsDetails = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        // Build a list of all appointments for the selected customer.
         for (Appointments appt : allAppointments) {
             if (appt.getCustomerId() == selectedCustomer.getCustomerId()) {
-                appointmentsDetails.append("Appointment ID: ")
-                        .append(appt.getAppointmentId())
-                        .append(", Type: ")
-                        .append(appt.getType())
-                        .append(", Start: ")
-                        .append(appt.getStartDateTime().format(formatter))
-                        .append(", End: ")
-                        .append(appt.getEndDateTime().format(formatter))
+                appointmentsDetails.append("Appointment ID: ").append(appt.getAppointmentId())
+                        .append(", Type: ").append(appt.getType())
+                        .append(", Start: ").append(appt.getStartDateTime().format(formatter))
+                        .append(", End: ").append(appt.getEndDateTime().format(formatter))
                         .append("\n");
             }
         }
-
-        // Build the customer details string.
-        String customerDetails = "Customer ID: " + selectedCustomer.getCustomerId() + "\n"
-                + "Customer Name: " + selectedCustomer.getCustomerName() + "\n"
-                + "Address: " + selectedCustomer.getAddress() + "\n"
-                + "Postal Code: " + selectedCustomer.getPostalCode() + "\n"
-                + "Phone: " + selectedCustomer.getPhone();
-
+        String customerDetails = "Customer ID: " + selectedCustomer.getCustomerId() + "\n" +
+                "Customer Name: " + selectedCustomer.getCustomerName() + "\n" +
+                "Address: " + selectedCustomer.getAddress() + "\n" +
+                "Postal Code: " + selectedCustomer.getPostalCode() + "\n" +
+                "Phone: " + selectedCustomer.getPhone();
         String confirmationMessage;
         if (appointmentsDetails.length() > 0) {
-            confirmationMessage = "Deleting this customer will also delete the following appointments:\n\n"
-                    + appointmentsDetails.toString()
-                    + "\nCustomer Details:\n" + customerDetails
-                    + "\n\nDo you want to proceed?";
+            confirmationMessage = "Deleting this customer will also delete the following appointments:\n\n" +
+                    appointmentsDetails.toString() +
+                    "\nCustomer Details:\n" + customerDetails +
+                    "\n\nDo you want to proceed?";
         } else {
-            confirmationMessage = "Customer Details:\n" + customerDetails
-                    + "\n\nThere are no appointments for this customer.\nDo you want to proceed with deletion?";
+            confirmationMessage = "Customer Details:\n" + customerDetails +
+                    "\n\nThere are no appointments for this customer.\nDo you want to proceed with deletion?";
         }
-
-        // Show a confirmation alert.
         Alert confirmAlert = new Alert(Alert.AlertType.CONFIRMATION);
         confirmAlert.setTitle("Confirm Delete Customer");
         confirmAlert.setHeaderText("Delete Customer and Associated Appointments");
         confirmAlert.setContentText(confirmationMessage);
         Optional<ButtonType> result = confirmAlert.showAndWait();
         if (result.isPresent() && result.get() == ButtonType.OK) {
-            // First, delete all appointments for the selected customer.
             for (Appointments appt : allAppointments) {
                 if (appt.getCustomerId() == selectedCustomer.getCustomerId()) {
                     AppointmentData.deleteAppointment(appt.getAppointmentId());
                 }
             }
-            // Now, delete the customer record.
             CustomerData.deleteCustomer(selectedCustomer.getCustomerId());
-
-            // Refresh the customer table.
             ObservableList<Customers> updatedCustomers = CustomerData.getAllCustomers();
             customerTable.setItems(updatedCustomers);
-
-            // Refresh the appointment table.
             ObservableList<Appointments> updatedAppointments = AppointmentData.getAllAppointments();
             appointmentTable.setItems(updatedAppointments);
-
-            // Show a success message.
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Customer Deleted");
             successAlert.setHeaderText(null);
@@ -287,6 +260,7 @@ public class mainpage {
         }
     }
 
+    // Exit application and close DB connection
     @FXML
     private void exitActionButton(ActionEvent event) {
         Alert alert = new Alert(Alert.AlertType.CONFIRMATION);
@@ -301,15 +275,13 @@ public class mainpage {
         });
     }
 
+    // Open reports view
     @FXML
     private void reportsActionButton(ActionEvent event) {
         try {
-            // Load the report.fxml file.
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/report.fxml"));
             Parent root = loader.load();
-            // Get the current stage from the event source.
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
-            // Replace the current scene's root with the report view.
             stage.getScene().setRoot(root);
         } catch (IOException e) {
             e.printStackTrace();
@@ -321,12 +293,14 @@ public class mainpage {
         }
     }
 
+    // Filter all appointments
     @FXML
     private void OnAllTimeRadio(ActionEvent event) {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
         appointmentTable.setItems(allAppointments);
     }
 
+    // Filter appointments by current month
     @FXML
     private void OnCurrentMonthRadio(ActionEvent event) {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
@@ -339,6 +313,7 @@ public class mainpage {
         appointmentTable.setItems(filteredAppointments);
     }
 
+    // Filter appointments by current week
     @FXML
     private void OnCurrentWeekRadio(ActionEvent event) {
         ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
@@ -353,38 +328,33 @@ public class mainpage {
         appointmentTable.setItems(filteredAppointments);
     }
 
-    // Initialize method to set up table data, time zone, etc.
+    //------ Initialize tables and time zone ------
     public void initialize() {
-        // Setup appointment table columns (existing code)...
+        // Appointment table columns
         appointmentIDColumn.setCellValueFactory(cellData -> cellData.getValue().appointmentIdProperty().asString());
         titleColumn.setCellValueFactory(cellData -> cellData.getValue().titleProperty());
         descriptionColumn.setCellValueFactory(cellData -> cellData.getValue().descriptionProperty());
         locationColumn.setCellValueFactory(cellData -> cellData.getValue().locationProperty());
         typeColumn.setCellValueFactory(cellData -> cellData.getValue().typeProperty());
-
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        startsAtColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
-        endsAtColumn.setCellValueFactory(cellData ->
-                new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
+        startsAtColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getStartDateTime().format(formatter)));
+        endsAtColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getEndDateTime().format(formatter)));
         customerIdColumn.setCellValueFactory(cellData -> cellData.getValue().customerIdProperty().asString());
         userIdColumn.setCellValueFactory(cellData -> cellData.getValue().userIdProperty().asString());
         contactIdColumn.setCellValueFactory(cellData -> cellData.getValue().contactIdProperty().asString());
 
-        // Set up customerTable columns.
+        // Customer table columns
         customerIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getCustomerId())));
         nameColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCustomerName()));
         addressColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getAddress()));
         postalCodeColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPostalCode()));
         phoneColumn.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getPhone()));
-
-        // For divisionIDColumn, simply display the division ID.
         divisionIDColumn.setCellValueFactory(cellData -> new SimpleStringProperty(String.valueOf(cellData.getValue().getDivisionId())));
 
-        // Lookup and display the state (division name) using the customer's division ID.
-        ObservableList<FirstLevelDivisions> divisions = javafx.collections.FXCollections.observableArrayList();
+        // State column: lookup division name using division ID.
+        ObservableList<FirstLevelDivisions> divisions = FXCollections.observableArrayList();
         try {
-            divisions.addAll(helper.FirstLevelDivisionData.getAllFirstLevelDivisions());
+            divisions.addAll(FirstLevelDivisionData.getAllFirstLevelDivisions());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -398,10 +368,10 @@ public class mainpage {
             return new SimpleStringProperty(stateName);
         });
 
-        // For countryColumn
+        // Country column: lookup country using division ID.
         ObservableList<Countries> countries = FXCollections.observableArrayList();
         try {
-            countries.addAll(helper.CountryData.getAllCountries());
+            countries.addAll(CountryData.getAllCountries());
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -422,7 +392,7 @@ public class mainpage {
             return new SimpleStringProperty(countryName);
         });
 
-        // Update the currentTimeZone TextField.
+        // Time zone display
         ZoneId zone = ZoneId.systemDefault();
         ZonedDateTime now = ZonedDateTime.now(zone);
         DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
@@ -433,47 +403,33 @@ public class mainpage {
         String city = (zoneParts.length > 1) ? zoneParts[1].replace('_', ' ') : "";
         currentTimeZone.setText(city + ", " + region + " - " + formattedTime);
 
-        // Set the All Time radio button as default and load all appointments.
+        // Default radio button and load appointments
         allTimeRadio.setSelected(true);
         OnAllTimeRadio(null);
 
-        // Load customers into the customerTable.
+        // Load customer data
         ObservableList<Customers> customersList = CustomerData.getAllCustomers();
         customerTable.setItems(customersList);
 
-        // Check for upcoming appointments within 15 minutes.
+        // Check upcoming appointments
         checkUpcomingAppointments();
     }
 
-    /**
-     * Checks for appointments that start within 15 minutes from now and displays an alert.
-     * If no appointments are upcoming within 15 minutes, displays a custom message.
-     */
+    //------ Check upcoming appointments within 15 minutes ------
     private void checkUpcomingAppointments() {
-        // Get the current UTC time.
         LocalDateTime now = LocalDateTime.now();
-        // Define the threshold as 15 minutes from now.
         LocalDateTime thresholdUtc = now.plusMinutes(15);
-
-        // Retrieve all appointments from the database.
         ObservableList<Appointments> appointments = AppointmentData.getAllAppointments();
         StringBuilder alertMsg = new StringBuilder();
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-
-        // Iterate through all appointments.
         for (Appointments appt : appointments) {
-            // Get the appointment start time directly from the database
             LocalDateTime apptStart = appt.getStartDateTime();
-
-            // Check if the appointment starts between now (inclusive) and 15 minutes later.
             if ((apptStart.isEqual(now) || apptStart.isAfter(now)) && apptStart.isBefore(thresholdUtc)) {
                 alertMsg.append("Appointment ID: ").append(appt.getAppointmentId())
-                        .append(", Date & Time: ").append(apptStart.format(formatter))
+                        .append(", Date & Time (UTC): ").append(apptStart.format(formatter))
                         .append("\n");
             }
         }
-
-        // Show the appropriate alert.
         if (alertMsg.length() > 0) {
             Alert upcomingAlert = new Alert(Alert.AlertType.INFORMATION);
             upcomingAlert.setTitle("Upcoming Appointment(s)");

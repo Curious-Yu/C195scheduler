@@ -1,5 +1,8 @@
 package controller;
 
+import helper.CountryData;
+import helper.CustomerData;
+import helper.FirstLevelDivisionData;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -8,25 +11,24 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
-import javafx.scene.control.*;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
+import javafx.scene.control.ListCell;
+import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
 import model.Countries;
 import model.Customers;
 import model.FirstLevelDivisions;
-import helper.CountryData;
-import helper.CustomerData;
-import helper.FirstLevelDivisionData;
-
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.Optional;
 import java.util.ResourceBundle;
 
 public class modifyCustomer implements Initializable {
 
+    //------ FXML Fields ------
     @FXML public TextField customerID;
     @FXML public TextField customerFirstName;
     @FXML public TextField customerLastName;
@@ -42,7 +44,7 @@ public class modifyCustomer implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Initialize the Country ComboBox.
+        //------ Initialize Country ComboBox ------
         ObservableList<Countries> countriesList = FXCollections.observableArrayList();
         try {
             countriesList.addAll(CountryData.getAllCountries());
@@ -68,7 +70,7 @@ public class modifyCustomer implements Initializable {
             }
         });
 
-        // Initialize the Division ComboBox; it will be populated when a country is selected.
+        //------ Initialize Division ComboBox ------
         customerDivision.setItems(FXCollections.observableArrayList());
         customerDivision.setConverter(new StringConverter<FirstLevelDivisions>() {
             @Override
@@ -89,15 +91,12 @@ public class modifyCustomer implements Initializable {
         });
     }
 
-    /**
-     * Called by the main page controller to pass the selected customer's data.
-     */
+    //------ Populate form with selected customer data ------
     public void setCustomerData(Customers selectedCustomer) {
         this.selectedCustomer = selectedCustomer;
-        // Populate fields.
         customerID.setText(String.valueOf(selectedCustomer.getCustomerId()));
 
-        // Assume the full name is stored in a single field; split into first and last names.
+        // Split full name into first and last names.
         String fullName = selectedCustomer.getCustomerName();
         String[] nameParts = fullName.split(" ", 2);
         customerFirstName.setText(nameParts.length > 0 ? nameParts[0] : "");
@@ -108,19 +107,15 @@ public class modifyCustomer implements Initializable {
         customerPhoneNumber.setText(selectedCustomer.getPhone());
 
         try {
-            // Get the division associated with this customer.
             FirstLevelDivisions division = FirstLevelDivisionData.getFirstLevelDivisionById(selectedCustomer.getDivisionId());
             if (division != null) {
-                // Load countries.
                 ObservableList<Countries> countriesList = FXCollections.observableArrayList(CountryData.getAllCountries());
                 customerCountry.setItems(countriesList);
-                // Get the country for the division.
                 Countries country = CountryData.getCountryById(division.getCountryId());
                 customerCountry.setValue(country);
-                // Load divisions for the selected country.
-                ObservableList<FirstLevelDivisions> divisionsList = FXCollections.observableArrayList(FirstLevelDivisionData.getDivisionsByCountryId(country.getCountryId()));
+                ObservableList<FirstLevelDivisions> divisionsList = FXCollections.observableArrayList(
+                        FirstLevelDivisionData.getDivisionsByCountryId(country.getCountryId()));
                 customerDivision.setItems(divisionsList);
-                // Set the selected division.
                 customerDivision.setValue(division);
             }
         } catch (SQLException e) {
@@ -128,12 +123,8 @@ public class modifyCustomer implements Initializable {
         }
     }
 
-    /**
-     * Event handler for the Save button.
-     * Validates input, updates the customer information, and returns to the main page.
-     */
+    //------ Save updated customer ------
     public void modifyCustomerSaveButton(ActionEvent actionEvent) {
-        // Validate required fields.
         if (customerFirstName.getText().isEmpty() ||
                 customerLastName.getText().isEmpty() ||
                 customerAddress.getText().isEmpty() ||
@@ -149,17 +140,12 @@ public class modifyCustomer implements Initializable {
             return;
         }
 
-        // Combine first and last names.
         String fullName = customerFirstName.getText().trim() + " " + customerLastName.getText().trim();
         String address = customerAddress.getText().trim();
         String postalCode = customerPostalCode.getText().trim();
         String phone = customerPhoneNumber.getText().trim();
         int divisionId = customerDivision.getValue().getDivisionId();
-
-        // Create an updated Customers object.
         Customers updatedCustomer = new Customers(selectedCustomer.getCustomerId(), fullName, address, postalCode, phone, divisionId);
-
-        // Update the customer in the database.
         CustomerData.updateCustomer(updatedCustomer);
 
         Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
@@ -168,7 +154,6 @@ public class modifyCustomer implements Initializable {
         successAlert.setContentText("The customer was successfully updated.");
         successAlert.showAndWait();
 
-        // Return to main page.
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
@@ -184,10 +169,7 @@ public class modifyCustomer implements Initializable {
         }
     }
 
-    /**
-     * Event handler for the Cancel button.
-     * Returns to the main page without saving changes.
-     */
+    //------ Cancel and return to main page ------
     public void modifyCustomerCancelButton(ActionEvent actionEvent) {
         try {
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
@@ -204,9 +186,13 @@ public class modifyCustomer implements Initializable {
         }
     }
 
+    //------ Optional: Country dropdown event ------
     public void customerCountryDropdown(ActionEvent actionEvent) {
+        // Additional logic can be added here if needed.
     }
 
+    //------ Optional: Division dropdown event ------
     public void customerDivisionDropdown(ActionEvent actionEvent) {
+        // Additional logic can be added here if needed.
     }
 }

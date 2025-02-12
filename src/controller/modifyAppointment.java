@@ -11,7 +11,6 @@ import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Node;
 import javafx.scene.Parent;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.stage.Stage;
 import javafx.util.StringConverter;
@@ -19,7 +18,6 @@ import model.Appointments;
 import model.Contacts;
 import model.Customers;
 import model.Users;
-
 import java.io.IOException;
 import java.net.URL;
 import java.time.*;
@@ -27,6 +25,7 @@ import java.util.ResourceBundle;
 
 public class modifyAppointment implements Initializable {
 
+    //------ FXML Fields ------
     @FXML private TextField apptID;
     @FXML private TextField apptTitle;
     @FXML private TextField apptDescription;
@@ -46,23 +45,24 @@ public class modifyAppointment implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle resourceBundle) {
-        // Populate the time ChoiceBoxes using a helper method.
+        //------ Populate time choice boxes ------
         populateTimeChoiceBox(apptStartTime);
         populateTimeChoiceBox(apptEndTime);
 
-        // Populate and set up the Contacts ComboBox.
+        //------ Set up Contacts ComboBox ------
         apptContactID.setItems(ContactData.getAllContacts());
         setupComboBoxForContacts(apptContactID);
 
-        // Populate and set up the Customer ComboBox.
+        //------ Set up Customers ComboBox ------
         apptCustomerID.setItems(CustomerData.getAllCustomers());
         setupComboBoxForCustomers(apptCustomerID);
 
-        // Populate and set up the Users ComboBox.
+        //------ Set up Users ComboBox ------
         apptUserID.setItems(UsersData.getAllUsers());
         setupComboBoxForUsers(apptUserID);
     }
 
+    //------ Populate time ChoiceBox ------
     private void populateTimeChoiceBox(ChoiceBox<LocalTime> choiceBox) {
         choiceBox.getItems().clear();
         for (int hour = 0; hour < 24; hour++) {
@@ -82,6 +82,7 @@ public class modifyAppointment implements Initializable {
         });
     }
 
+    //------ Set up Contacts ComboBox ------
     private void setupComboBoxForContacts(ComboBox<Contacts> comboBox) {
         comboBox.setConverter(new StringConverter<Contacts>() {
             @Override
@@ -97,11 +98,12 @@ public class modifyAppointment implements Initializable {
             @Override
             protected void updateItem(Contacts contact, boolean empty) {
                 super.updateItem(contact, empty);
-                setText((empty || contact == null) ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")");
+                setText(empty || contact == null ? "" : contact.getContactName() + " (ID: " + contact.getContactId() + ")");
             }
         });
     }
 
+    //------ Set up Customers ComboBox ------
     private void setupComboBoxForCustomers(ComboBox<Customers> comboBox) {
         comboBox.setConverter(new StringConverter<Customers>() {
             @Override
@@ -117,11 +119,12 @@ public class modifyAppointment implements Initializable {
             @Override
             protected void updateItem(Customers customer, boolean empty) {
                 super.updateItem(customer, empty);
-                setText((empty || customer == null) ? "" : customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
+                setText(empty || customer == null ? "" : customer.getCustomerName() + " (ID: " + customer.getCustomerId() + ")");
             }
         });
     }
 
+    //------ Set up Users ComboBox ------
     private void setupComboBoxForUsers(ComboBox<Users> comboBox) {
         comboBox.setConverter(new StringConverter<Users>() {
             @Override
@@ -137,25 +140,21 @@ public class modifyAppointment implements Initializable {
             @Override
             protected void updateItem(Users user, boolean empty) {
                 super.updateItem(user, empty);
-                setText((empty || user == null) ? "" : user.getUserName() + " (ID: " + user.getUserId() + ")");
+                setText(empty || user == null ? "" : user.getUserName() + " (ID: " + user.getUserId() + ")");
             }
         });
     }
 
-    /**
-     * Receives the selected appointment from the main page and populates the modify form.
-     * NOTE: This version uses the raw UTC times (without additional conversion) so that they match
-     * what is shown in the main page.
-     */
+    //------ Populate form with appointment data ------
     public void initData(Appointments appointment) {
         this.selectedAppointment = appointment;
-        // Populate text fields.
         apptID.setText(String.valueOf(appointment.getAppointmentId()));
         apptTitle.setText(appointment.getTitle());
         apptDescription.setText(appointment.getDescription());
         apptLocation.setText(appointment.getLocation());
         apptType.setText(appointment.getType());
-        // Use the raw UTC times as stored (not converting them).
+
+        // Use raw UTC times as stored
         LocalDate startDate = appointment.getStartDateTime().toLocalDate();
         LocalTime startTime = appointment.getStartDateTime().toLocalTime();
         LocalDate endDate = appointment.getEndDateTime().toLocalDate();
@@ -164,7 +163,8 @@ public class modifyAppointment implements Initializable {
         apptStartTime.setValue(startTime);
         apptEndDate.setValue(endDate);
         apptEndTime.setValue(endTime);
-        // Set selected items in ComboBoxes by comparing IDs.
+
+        //------ Set ComboBox selections ------
         for (Contacts contact : apptContactID.getItems()) {
             if (contact.getContactId() == appointment.getContactId()) {
                 apptContactID.setValue(contact);
@@ -185,14 +185,10 @@ public class modifyAppointment implements Initializable {
         }
     }
 
-    /**
-     * Event handler for the Save button.
-     * Validates input, creates an updated Appointment object, updates the database,
-     * and returns to the main page in the same window.
-     */
+    //------ Save modified appointment ------
     @FXML
     private void ModifyApptSaveAction(ActionEvent event) {
-        // Validate that all required fields are filled.
+        //------ Validate fields ------
         if (apptTitle.getText().isEmpty() ||
                 apptDescription.getText().isEmpty() ||
                 apptLocation.getText().isEmpty() ||
@@ -213,7 +209,7 @@ public class modifyAppointment implements Initializable {
         }
 
         try {
-            // Combine date and time values.
+            //------ Combine date/time values ------
             LocalDate startDate = apptStartDate.getValue();
             LocalTime startTime = apptStartTime.getValue();
             LocalDate endDate = apptEndDate.getValue();
@@ -221,16 +217,22 @@ public class modifyAppointment implements Initializable {
             LocalDateTime startDateTime = startDate.atTime(startTime);
             LocalDateTime endDateTime = endDate.atTime(endTime);
 
-            // --- BUSINESS HOURS VALIDATION ---
-            // Business hours are defined as 8:00 AM to 10:00 PM Eastern Time (ET).
-            // Convert the entered local times to Eastern Time.
+            //------ Validate End Time > Start Time ------
+            if (!endDateTime.isAfter(startDateTime)) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Invalid Appointment Time");
+                alert.setHeaderText("End time must be after start time");
+                alert.setContentText("Please enter an end date/time that is later than the start date/time.");
+                alert.showAndWait();
+                return;
+            }
+
+            //------ Business hours validation (8 AM - 10 PM ET) ------
             ZoneId easternZone = ZoneId.of("America/New_York");
             ZonedDateTime startEastern = startDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
             ZonedDateTime endEastern = endDateTime.atZone(ZoneId.systemDefault()).withZoneSameInstant(easternZone);
-
-            LocalTime businessStart = LocalTime.of(8, 0);  // 8:00 AM ET
-            LocalTime businessEnd = LocalTime.of(22, 0);   // 10:00 PM ET
-
+            LocalTime businessStart = LocalTime.of(8, 0);
+            LocalTime businessEnd = LocalTime.of(22, 0);
             if (startEastern.toLocalTime().isBefore(businessStart) || endEastern.toLocalTime().isAfter(businessEnd)) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Outside Business Hours");
@@ -240,20 +242,17 @@ public class modifyAppointment implements Initializable {
                 return;
             }
 
-            // --- OVERLAPPING APPOINTMENT VALIDATION ---
-            // Check for overlapping appointments for the same customer (exclude the appointment being modified).
+            //------ Overlapping appointment validation ------
             int customerID = apptCustomerID.getValue().getCustomerId();
             ObservableList<Appointments> allAppointments = AppointmentData.getAllAppointments();
             for (Appointments existingAppt : allAppointments) {
-                // Only check appointments for the same customer, excluding the one being modified.
                 if (existingAppt.getCustomerId() == customerID &&
                         existingAppt.getAppointmentId() != selectedAppointment.getAppointmentId()) {
-                    // Overlap condition: newStart < existingEnd AND newEnd > existingStart.
                     if (startDateTime.isBefore(existingAppt.getEndDateTime()) &&
                             endDateTime.isAfter(existingAppt.getStartDateTime())) {
                         Alert alert = new Alert(Alert.AlertType.ERROR);
                         alert.setTitle("Overlapping Appointment");
-                        alert.setHeaderText("Appointment Overlap Detected");
+                        alert.setHeaderText("Appointment overlap detected");
                         alert.setContentText("The updated appointment overlaps with an existing appointment for the selected customer.");
                         alert.showAndWait();
                         return;
@@ -261,59 +260,43 @@ public class modifyAppointment implements Initializable {
                 }
             }
 
-            // Retrieve text field values.
+            //------ Retrieve field values ------
             String title = apptTitle.getText();
             String description = apptDescription.getText();
             String location = apptLocation.getText();
             String type = apptType.getText();
-
-            // Retrieve selected IDs.
             int contactID = apptContactID.getValue().getContactId();
             int userID = apptUserID.getValue().getUserId();
 
-            // Create an updated Appointment object.
+            //------ Create and update appointment ------
             Appointments updatedAppointment = new Appointments(
                     selectedAppointment.getAppointmentId(),
-                    title,
-                    description,
-                    location,
-                    type,
-                    startDateTime,
-                    endDateTime,
-                    customerID,
-                    userID,
-                    contactID
-            );
-
-            // Update the appointment in the database.
+                    title, description, location, type,
+                    startDateTime, endDateTime, customerID, userID, contactID);
             AppointmentData.updateAppointment(updatedAppointment);
 
-            // Show success message.
             Alert successAlert = new Alert(Alert.AlertType.INFORMATION);
             successAlert.setTitle("Appointment Updated");
             successAlert.setHeaderText(null);
             successAlert.setContentText("The appointment was successfully updated.");
             successAlert.showAndWait();
 
-            // Return to the main page in the same window.
+            //------ Return to main page ------
             FXMLLoader loader = new FXMLLoader(getClass().getResource("/view/mainpage.fxml"));
             Parent mainPageRoot = loader.load();
             Stage stage = (Stage) ((Node) event.getSource()).getScene().getWindow();
             stage.getScene().setRoot(mainPageRoot);
         } catch (IOException e) {
             e.printStackTrace();
-            Alert errorAlert = new Alert(Alert.AlertType.ERROR);
-            errorAlert.setTitle("Error Updating Appointment");
-            errorAlert.setHeaderText("An error occurred");
-            errorAlert.setContentText("Unable to update the appointment. Please try again.");
-            errorAlert.showAndWait();
+            Alert alert = new Alert(Alert.AlertType.ERROR);
+            alert.setTitle("Error Updating Appointment");
+            alert.setHeaderText("An error occurred");
+            alert.setContentText("Unable to update the appointment. Please try again.");
+            alert.showAndWait();
         }
     }
 
-    /**
-     * Event handler for the Cancel button.
-     * Returns to the main page without saving changes in the same window.
-     */
+    //------ Cancel and return to main page ------
     @FXML
     private void ModifyApptCancelAction(ActionEvent event) {
         try {
